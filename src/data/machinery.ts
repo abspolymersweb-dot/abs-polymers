@@ -613,3 +613,4 @@ export const MACHINERY_PRODUCTS: MachineryProduct[] = [
     published: true
   }
 ];
+

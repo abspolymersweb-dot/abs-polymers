@@ -1,130 +1,191 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Phone, Mail, ArrowRight, ShieldCheck, Globe } from 'lucide-react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Phone,
+  Mail,
+  ArrowRight,
+} from 'lucide-react';
 import { COMPANY_INFO } from '@/data/company';
 
+/* ─── Navigation types & data ────────────────────────────── */
+
+interface DropdownItem {
+  name: string;
+  href: string;
+  desc: string;
+}
+
+interface NavItem {
+  name: string;
+  href: string;
+  dropdown?: DropdownItem[];
+}
+
+const NAV_LINKS: NavItem[] = [
+  { name: 'Home', href: '/' },
+  { name: 'About Us', href: '/about' },
+  {
+    name: 'Machineries',
+    href: '/machineries',
+    dropdown: [
+      { name: 'All Machineries', href: '/machineries', desc: 'Complete industrial catalogue' },
+      { name: 'Plastic Washing Plants', href: '/machineries/absw-plastic-washing-plant', desc: '10 FT compact design with water recycling' },
+      { name: 'Crushers & Granulators', href: '/machineries/g-series-plastic-crusher-machine', desc: 'EN41 steel blades & 20–60 HP motors' },
+      { name: 'Screw Conveyors', href: '/machineries/cr-series-screw-conveyor', desc: 'CR Series 5400 mm continuous feed' },
+      { name: 'Transport Blowers', href: '/machineries/mtb-material-transport-blower', desc: 'MTB 2880 RPM pneumatic conveying' },
+    ],
+  },
+  { name: 'Granules', href: '/granules' },
+  { name: 'Solutions', href: '/services' },
+  { name: 'Insights', href: '/blog' },
+  { name: 'Contact', href: '/contact' },
+];
+
+/* ─── Framer-motion variants ─────────────────────────────── */
+
+const mobileOverlay: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.25 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const mobilePanel: Variants = {
+  hidden: { x: '100%' },
+  visible: { x: 0, transition: { type: 'spring', damping: 30, stiffness: 300 } },
+  exit: { x: '100%', transition: { duration: 0.25 } },
+};
+
+const dropdownVariants: Variants = {
+  hidden: { opacity: 0, y: 8, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: 'easeOut' } },
+  exit: { opacity: 0, y: 4, scale: 0.98, transition: { duration: 0.12 } },
+};
+
+/* ─── Component ──────────────────────────────────────────── */
+
 export default function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [machineryDropdownOpen, setMachineryDropdownOpen] = useState(false);
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // If in admin area, do not show the public navbar
-  if (pathname.startsWith('/admin')) {
-    return null;
-  }
+  /* Scroll listener — transparent → solid at 80 px */
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 80);
+  }, []);
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/about' },
-    {
-      name: 'Our Machinery',
-      href: '/machineries',
-      dropdown: [
-        { name: 'All Machineries', href: '/machineries', desc: 'Complete industrial catalogue' },
-        { name: 'Plastic Washing Plants', href: '/machineries/absw-plastic-washing-plant', desc: '10 FT compact design with water recycling' },
-        { name: 'Plastic Crushers & Granulators', href: '/machineries/g-series-plastic-crusher-machine', desc: 'EN41 steel blades & 20-60 HP motors' },
-        { name: 'Screw Conveyors', href: '/machineries/cr-series-screw-conveyor', desc: 'CR Series 5400 mm continuous feed' },
-        { name: 'Material Transport Blowers', href: '/machineries/mtb-material-transport-blower', desc: 'MTB 2880 RPM pneumatic conveying' },
-      ]
-    },
-    { name: 'Granules', href: '/granules' },
-    { name: 'Recycling Solutions', href: '/services' },
-    { name: 'Blogs', href: '/blog' },
-    { name: 'Contact Us', href: '/contact' }
-  ];
+  useEffect(() => {
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  /* Lock body scroll when mobile menu is open */
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  /* Hide on admin */
+  if (pathname.startsWith('/admin')) return null;
+
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/' && pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
-      {/* Top micro bar for global reach and contact */}
-      <div className="hidden lg:block bg-navy-950 text-slate-300 text-xs py-1.5 px-6 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <span className="flex items-center text-slate-400">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-              Coimbatore, Tamil Nadu, India • Exporting to UAE & Worldwide
-            </span>
-            <span className="text-slate-400">|</span>
-            <span className="text-slate-300 font-medium">35+ Years Granules Expertise • 6+ Years Machinery Manufacturing</span>
-          </div>
-          <div className="flex items-center space-x-5">
-            <a href={`tel:${COMPANY_INFO.contact.phone}`} className="flex items-center hover:text-white transition-colors">
-              <Phone className="w-3.5 h-3.5 mr-1 text-brand-orange" />
-              {COMPANY_INFO.contact.phoneDisplay}
-            </a>
-            <a href={`mailto:${COMPANY_INFO.contact.salesEmail}`} className="flex items-center hover:text-white transition-colors">
-              <Mail className="w-3.5 h-3.5 mr-1 text-brand-orange" />
-              {COMPANY_INFO.contact.salesEmail}
-            </a>
-            <Link href="/admin" className="flex items-center text-slate-400 hover:text-white transition-colors bg-navy-850 px-2 py-0.5 rounded text-[11px]">
-              <ShieldCheck className="w-3 h-3 mr-1 text-emerald-400" />
-              Admin Portal
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Main navigation container */}
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/60'
+          : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Official Logo */}
-          <Link href="/" className="flex items-center group py-2">
-            <div className="relative h-12 w-48 sm:h-14 sm:w-56 transition-transform group-hover:scale-[1.02]">
+          {/* ── Logo ── */}
+          <Link href="/" className="relative flex items-center group py-2 shrink-0">
+            <div className="relative h-12 w-48 sm:h-14 sm:w-56 transition-transform duration-300 group-hover:scale-[1.02]">
               <Image
                 src="/images/logo.png"
-                alt="ABS Polymers - Plastic Recycling Machinery"
+                alt="ABS Polymers — Plastic Recycling Machinery"
                 fill
                 priority
-                className="object-contain object-left"
+                className={`object-contain object-left transition-all duration-500 ${
+                  scrolled ? '' : 'brightness-0 invert'
+                }`}
               />
             </div>
           </Link>
 
-          {/* Desktop Nav Items */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-
+          {/* ── Desktop Nav ── */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {NAV_LINKS.map((link) => {
               if (link.dropdown) {
                 return (
                   <div
                     key={link.name}
                     className="relative"
-                    onMouseEnter={() => setMachineryDropdownOpen(true)}
-                    onMouseLeave={() => setMachineryDropdownOpen(false)}
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => setDropdownOpen(false)}
                   >
                     <Link
                       href={link.href}
-                      className={`flex items-center px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
-                        isActive
-                          ? 'text-[#04294a] bg-slate-100'
-                          : 'text-slate-700 hover:text-[#04294a] hover:bg-slate-50'
+                      className={`group relative flex items-center px-3 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-300 ${
+                        scrolled
+                          ? isActive(link.href)
+                            ? 'text-navy-900'
+                            : 'text-slate-700 hover:text-navy-900'
+                          : isActive(link.href)
+                            ? 'text-white'
+                            : 'text-white/85 hover:text-white'
                       }`}
                     >
                       {link.name}
-                      <ChevronDown className={`ml-1 w-4 h-4 transition-transform ${machineryDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        className={`ml-1 w-3.5 h-3.5 transition-transform duration-200 ${
+                          dropdownOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                      <span
+                        className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-300 origin-left ${
+                          scrolled ? 'bg-brand-orange' : 'bg-white'
+                        } ${isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                      />
                     </Link>
 
-                    {machineryDropdownOpen && (
-                      <div className="absolute top-full left-0 w-80 bg-white rounded-xl shadow-xl border border-slate-100 py-2 mt-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                        {link.dropdown.map((item) => (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className="block px-4 py-2.5 hover:bg-slate-50 transition-colors group"
-                            onClick={() => setMachineryDropdownOpen(false)}
-                          >
-                            <div className="text-sm font-semibold text-slate-800 group-hover:text-[#f37021]">
-                              {item.name}
-                            </div>
-                            <div className="text-xs text-slate-500 mt-0.5">{item.desc}</div>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
+                    <AnimatePresence>
+                      {dropdownOpen && (
+                        <motion.div
+                          variants={dropdownVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                          className="absolute top-full left-0 w-80 bg-white rounded-xl shadow-xl border border-slate-100 py-2 mt-2 z-50"
+                        >
+                          {link.dropdown.map((item) => (
+                            <Link
+                              key={item.name}
+                              href={item.href}
+                              className="block px-4 py-2.5 hover:bg-slate-50 transition-colors group/item"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              <div className="text-sm font-semibold text-slate-800 group-hover/item:text-brand-orange transition-colors">
+                                {item.name}
+                              </div>
+                              <div className="text-xs text-slate-500 mt-0.5">{item.desc}</div>
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               }
@@ -133,36 +194,40 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
-                    isActive
-                      ? 'text-[#04294a] bg-slate-100'
-                      : 'text-slate-700 hover:text-[#04294a] hover:bg-slate-50'
+                  className={`group relative px-3 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-300 ${
+                    scrolled
+                      ? isActive(link.href)
+                        ? 'text-navy-900'
+                        : 'text-slate-700 hover:text-navy-900'
+                      : isActive(link.href)
+                        ? 'text-white'
+                        : 'text-white/85 hover:text-white'
                   }`}
                 >
                   {link.name}
+                  <span
+                    className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-300 origin-left ${
+                      scrolled ? 'bg-brand-orange' : 'bg-white'
+                    } ${isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                  />
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Action buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <div className="flex items-center text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-md">
-              <Globe className="w-3.5 h-3.5 mr-1 text-slate-500" />
-              <span>EN</span>
-            </div>
-
+          {/* ── Right Actions ── */}
+          <div className="hidden lg:flex items-center gap-3">
             <Link
               href="/contact?intent=quote"
-              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+              className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
             >
-              <span>Request a Quote</span>
+              Request a Quote
               <ArrowRight className="ml-1.5 w-4 h-4" />
             </Link>
           </div>
 
-          {/* Mobile hamburger button */}
-          <div className="flex lg:hidden items-center space-x-2">
+          {/* ── Mobile Controls ── */}
+          <div className="flex lg:hidden items-center gap-2">
             <Link
               href="/contact?intent=quote"
               className="px-3 py-1.5 text-xs font-bold text-white bg-brand-orange rounded-md"
@@ -170,69 +235,122 @@ export default function Navbar() {
               Quote
             </Link>
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-slate-700 hover:bg-slate-100 focus:outline-none"
-              aria-label="Toggle menu"
+              onClick={() => setMobileOpen(true)}
+              className={`p-2 rounded-md transition-colors ${
+                scrolled
+                  ? 'text-slate-700 hover:bg-slate-100'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label="Open menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-2 shadow-2xl">
-          <div className="py-2 border-b border-slate-100 mb-2">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">ABS Polymers Coimbatore</div>
-            <div className="text-xs text-slate-600">Exporting to UAE & Serving Pan-India</div>
-          </div>
-          {navLinks.map((link) => (
-            <div key={link.name}>
-              <Link
-                href={link.href}
-                className="block px-3 py-2.5 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-orange rounded-md"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-              {link.dropdown && (
-                <div className="pl-6 space-y-1 my-1 border-l-2 border-slate-100">
-                  {link.dropdown.map((sub) => (
-                    <Link
-                      key={sub.name}
-                      href={sub.href}
-                      className="block py-1.5 text-sm text-slate-600 hover:text-brand-orange"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {sub.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+      {/* ── Mobile Full-Screen Overlay ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              key="backdrop"
+              variants={mobileOverlay}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-40"
+            />
 
-          <div className="pt-4 border-t border-slate-100 space-y-3">
-            <Link
-              href="/contact?intent=quote"
-              className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-white bg-brand-orange rounded-md shadow"
-              onClick={() => setMobileMenuOpen(false)}
+            <motion.div
+              key="panel"
+              variants={mobilePanel}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl"
             >
-              Request a Machinery Quote
-            </Link>
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-              <a href={`tel:${COMPANY_INFO.contact.phone}`} className="flex items-center text-slate-700 font-semibold">
-                <Phone className="w-3.5 h-3.5 mr-1 text-brand-orange" />
-                {COMPANY_INFO.contact.phoneDisplay}
-              </a>
-              <Link href="/admin" className="text-slate-500 hover:underline">
-                Admin Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <Link href="/" onClick={() => setMobileOpen(false)} className="relative h-10 w-40">
+                  <Image
+                    src="/images/logo.png"
+                    alt="ABS Polymers"
+                    fill
+                    className="object-contain object-left"
+                  />
+                </Link>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-md text-slate-500 hover:bg-slate-100"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
+                {NAV_LINKS.map((link) => (
+                  <div key={link.name}>
+                    <Link
+                      href={link.href}
+                      className={`block px-3 py-3 text-base font-semibold rounded-lg transition-colors ${
+                        isActive(link.href)
+                          ? 'text-brand-orange bg-orange-50'
+                          : 'text-slate-800 hover:bg-slate-50 hover:text-brand-orange'
+                      }`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                    {link.dropdown && (
+                      <div className="pl-6 space-y-0.5 mb-1 border-l-2 border-slate-100 ml-3">
+                        {link.dropdown.map((sub) => (
+                          <Link
+                            key={sub.name}
+                            href={sub.href}
+                            className="block py-2 px-2 text-sm text-slate-600 hover:text-brand-orange transition-colors rounded"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-100 px-5 py-5 space-y-3 bg-slate-50">
+                <Link
+                  href="/contact?intent=quote"
+                  className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Request a Quote
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <a
+                    href={`tel:${COMPANY_INFO.contact.phone}`}
+                    className="flex items-center font-medium text-slate-700"
+                  >
+                    <Phone className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                    {COMPANY_INFO.contact.phoneDisplay}
+                  </a>
+                  <a
+                    href={`mailto:${COMPANY_INFO.contact.email}`}
+                    className="flex items-center font-medium text-slate-700"
+                  >
+                    <Mail className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                    Email Us
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

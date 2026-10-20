@@ -12,3 +12,4 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: 'https://abspolymers.com/sitemap.xml',
   };
 }
+

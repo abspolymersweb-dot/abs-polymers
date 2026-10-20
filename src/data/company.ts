@@ -42,3 +42,4 @@ export const COMPANY_INFO = {
     { title: 'Proven UAE Export Track Record', desc: 'Machinery tested and performing under demanding high-ambient industrial operating environments.' }
   ]
 };
+

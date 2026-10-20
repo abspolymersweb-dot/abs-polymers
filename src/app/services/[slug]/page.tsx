@@ -150,3 +150,4 @@ export default async function ServiceDetailPage({
     </div>
   );
 }
+

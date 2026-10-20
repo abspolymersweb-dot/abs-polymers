@@ -1,65 +1,190 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   ABS Polymers — Premium Industrial Theme
+   ───────────────────────────────────────────── */
+
 @layer base {
   :root {
-    --primary: #04294a;
-    --primary-dark: #02182c;
-    --primary-light: #0b497e;
+    /* Brand Navy Palette */
+    --navy-950: #031326;
+    --navy-900: #061e38;
+    --navy-850: #08284c;
+    --navy-800: #0b3461;
+    --navy-700: #124b86;
+
+    /* Brand Accent */
     --accent: #f37021;
     --accent-hover: #d95e12;
     --accent-light: #fff3ec;
+
+    /* Surfaces */
     --surface-bg: #f8fafc;
     --surface-card: #ffffff;
+
+    /* Text */
     --text-primary: #0f172a;
     --text-secondary: #475569;
+
+    /* Border */
     --border-color: #e2e8f0;
+  }
+
+  /* Smooth scroll — respects user preferences */
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: #ffffff;
-    color: #0f172a;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Selection highlight */
+  ::selection {
+    background-color: var(--accent);
+    color: #ffffff;
+  }
 }
 
-/* Custom industrial utilities */
-.bg-navy-950 { background-color: #031326; }
-.bg-navy-900 { background-color: #061e38; }
-.bg-navy-850 { background-color: #08284c; }
-.bg-navy-800 { background-color: #0b3461; }
-.bg-navy-700 { background-color: #124b86; }
+/* ─────────────────────────────────────────────
+   Custom Utility Classes
+   ───────────────────────────────────────────── */
 
-.text-navy-950 { color: #031326; }
-.text-navy-900 { color: #061e38; }
-.text-navy-800 { color: #0b3461; }
-.text-navy-700 { color: #124b86; }
+/* Navy backgrounds */
+.bg-navy-950 { background-color: var(--navy-950); }
+.bg-navy-900 { background-color: var(--navy-900); }
+.bg-navy-850 { background-color: var(--navy-850); }
+.bg-navy-800 { background-color: var(--navy-800); }
+.bg-navy-700 { background-color: var(--navy-700); }
 
-.text-brand-orange { color: #f37021; }
-.bg-brand-orange { background-color: #f37021; }
-.border-brand-orange { border-color: #f37021; }
-.hover\:bg-brand-orange-hover:hover { background-color: #d95e12; }
+/* Navy text */
+.text-navy-950 { color: var(--navy-950); }
+.text-navy-900 { color: var(--navy-900); }
+.text-navy-800 { color: var(--navy-800); }
+.text-navy-700 { color: var(--navy-700); }
 
-/* Grid patterns & tech graphics */
+/* Brand accent */
+.text-brand-orange { color: var(--accent); }
+.bg-brand-orange { background-color: var(--accent); }
+.border-brand-orange { border-color: var(--accent); }
+.hover\:bg-brand-orange-hover:hover { background-color: var(--accent-hover); }
+.hover\:text-brand-orange:hover { color: var(--accent); }
+
+/* ─────────────────────────────────────────────
+   Background Patterns & Decorative Effects
+   ───────────────────────────────────────────── */
+
+/* Subtle tech grid — dark surfaces */
 .bg-tech-grid {
   background-size: 32px 32px;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
+/* Subtle tech grid — light surfaces */
 .bg-tech-grid-light {
   background-size: 32px 32px;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
 }
 
+/* Radial glow overlays */
 .bg-radial-glow {
   background: radial-gradient(circle at 50% 30%, rgba(243, 112, 33, 0.15), transparent 70%);
 }
 
 .bg-navy-glow {
   background: radial-gradient(circle at 60% 40%, rgba(18, 75, 134, 0.35), transparent 70%);
+}
+
+/* ─────────────────────────────────────────────
+   Animation Keyframes
+   ───────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealMask {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+/* Utility animation classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out both;
+}
+
+.animate-reveal-mask {
+  animation: revealMask 0.8s ease-out both;
+}
+
+.animate-slow-zoom {
+  animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
+/* ─────────────────────────────────────────────
+   Reduced-Motion — Disable all custom anims
+   ───────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

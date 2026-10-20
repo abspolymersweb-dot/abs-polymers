@@ -109,3 +109,4 @@ npm run start
 | `MCP_SERVER_URL` | Optional | External Model Context Protocol HTTP/WS endpoint for AI agents. |
 | `MCP_API_KEY` | Optional | Bearer authentication key for MCP server. |
 | `NEXT_PUBLIC_GA_ID` | Optional | Google Analytics 4 measurement ID. |
+

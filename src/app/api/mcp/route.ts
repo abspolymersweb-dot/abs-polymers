@@ -29,3 +29,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'MCP adapter processing failure' }, { status: 500 });
   }
 }
+
