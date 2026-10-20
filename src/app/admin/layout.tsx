@@ -8,7 +8,7 @@ import {
   LayoutDashboard,
   Inbox,
   FileText,
-  Edit3,
+  LayoutTemplate,
   Layers,
   Sparkles,
   Wrench,
@@ -20,8 +20,7 @@ import {
   X,
   ExternalLink,
   Shield,
-  AlertTriangle,
-  Cpu
+  Edit3
 } from 'lucide-react';
 import { COMPANY_INFO } from '@/data/company';
 
@@ -35,12 +34,12 @@ export default function AdminLayout({
 
   const navItems = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-    { name: 'Inquiries', href: '/admin/inquiries', icon: Inbox },
-    { name: 'Blogs & Articles', href: '/admin/blogs', icon: FileText },
-    { name: 'CMS & Content', href: '/admin/cms', icon: Edit3 },
+    { name: 'Pages & CMS', href: '/admin/pages', icon: LayoutTemplate },
+    { name: 'Inquiries & CRM', href: '/admin/inquiries', icon: Inbox },
     { name: 'Machineries', href: '/admin/machineries', icon: Layers },
     { name: 'Granules', href: '/admin/granules', icon: Sparkles },
     { name: 'Services', href: '/admin/services', icon: Wrench },
+    { name: 'Blogs & Articles', href: '/admin/blogs', icon: FileText },
     { name: 'SEO Engine', href: '/admin/seo', icon: Search },
     { name: 'Database Health', href: '/admin/db-health', icon: Activity },
     { name: 'Settings & Integrations', href: '/admin/settings', icon: Settings },
@@ -51,19 +50,23 @@ export default function AdminLayout({
       {/* Mobile Top Navbar */}
       <div className="md:hidden bg-navy-950 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center space-x-2">
-          <div className="relative h-8 w-28 bg-white/90 p-1 rounded">
+          {/* Logo with transparent background & white filter */}
+          <div className="relative h-8 w-32">
             <Image
               src="/images/logo.png"
               alt="ABS Polymers"
               fill
-              className="object-contain"
+              className="object-contain object-left brightness-0 invert"
             />
           </div>
-          <span className="text-xs font-bold text-brand-orange uppercase">Admin</span>
+          <span className="text-[10px] font-bold text-brand-orange uppercase px-2 py-0.5 bg-brand-orange/15 rounded">
+            Admin
+          </span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-slate-800"
+          aria-label="Toggle navigation"
         >
           {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -76,27 +79,28 @@ export default function AdminLayout({
         }`}
       >
         <div>
-          {/* Logo container */}
+          {/* Logo container with transparent background */}
           <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
             <Link href="/admin" className="flex items-center space-x-2">
-              <div className="relative h-10 w-36 bg-white/90 p-1.5 rounded-lg shadow-sm">
+              <div className="relative h-10 w-44">
                 <Image
                   src="/images/logo.png"
                   alt="ABS Polymers"
                   fill
-                  className="object-contain"
+                  priority
+                  className="object-contain object-left brightness-0 invert"
                 />
               </div>
             </Link>
           </div>
 
           {/* Environmental / State Banner in Sidebar */}
-          <div className="px-4 py-2.5 bg-navy-900 border-b border-slate-800 flex items-center justify-between text-[11px]">
+          <div className="px-4 py-2 bg-navy-900 border-b border-slate-800 flex items-center justify-between text-[11px]">
             <span className="flex items-center text-amber-400 font-semibold">
               <span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>
-              Dev Repository Mode
+              Admin Workspace
             </span>
-            <span className="text-slate-400">v1.0.0</span>
+            <span className="text-slate-400 font-mono text-[10px]">v2.1</span>
           </div>
 
           {/* Navigation Items */}
@@ -132,66 +136,25 @@ export default function AdminLayout({
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between text-xs text-slate-300 hover:text-white p-2 rounded hover:bg-navy-850"
+            className="flex items-center justify-between text-xs text-slate-300 hover:text-white p-2 rounded hover:bg-navy-850 transition-colors"
           >
             <span className="flex items-center">
               <ExternalLink className="w-3.5 h-3.5 mr-2 text-brand-orange" />
               Live Public Site
             </span>
-            <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">Open</span>
+            <span className="text-[10px] text-slate-500 font-mono">/</span>
           </Link>
-
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-400">
-            <span className="truncate">Coimbatore Admin Desk</span>
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Logged in as Admin</span>
+            <span className="text-emerald-400 font-bold">Secure</span>
           </div>
         </div>
       </aside>
 
-      {/* Main Administrative Canvas */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-        {/* Top Header bar */}
-        <header className="bg-white border-b border-slate-200 py-3.5 px-6 flex items-center justify-between shadow-xs">
-          <div className="flex items-center space-x-3">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              ABS Polymers Administration
-            </span>
-            <span className="text-slate-300">/</span>
-            <span className="text-xs font-semibold text-slate-700 capitalize">
-              {pathname.replace('/admin', '').replace('/', '') || 'Overview'}
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {/* Database status chip */}
-            <Link
-              href="/admin/db-health"
-              className="hidden sm:flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors"
-            >
-              <AlertTriangle className="w-3.5 h-3.5 mr-1 text-amber-600" />
-              <span>DB: In-Memory / Dev Mode</span>
-            </Link>
-
-            {/* MCP Adapter chip */}
-            <Link
-              href="/admin/settings"
-              className="hidden sm:flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 transition-colors"
-            >
-              <Cpu className="w-3.5 h-3.5 mr-1 text-blue-600" />
-              <span>MCP: Ready (Local Adapter)</span>
-            </Link>
-
-            <div className="text-xs text-right">
-              <div className="font-bold text-slate-800">Engineering Administrator</div>
-              <div className="text-[10px] text-slate-500">Coimbatore Headquarters</div>
-            </div>
-          </div>
-        </header>
-
-        {/* Dynamic Admin View */}
-        <main className="p-6 sm:p-8 flex-1">{children}</main>
-      </div>
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
-

@@ -181,18 +181,19 @@ export default function ServicesSection() {
                 Keep your plant operating at peak capacity with genuine replacement knives, Havells heavy-duty motor spares, and dynamic-balanced rotors machined directly in our Coimbatore works.
               </p>
               <div className="pt-2 flex flex-wrap gap-3">
+                {/* Fast quotation transition preselecting Spare Parts and Replacement Knives */}
                 <Link
-                  href="/services/genuine-spare-parts-and-components"
-                  className="inline-flex items-center px-5 py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-lg text-xs font-bold transition-colors"
+                  href="/contact?intent=spare_parts&part=Replacement+Knife+Parts+(EN41+Alloy+Steel)&product=g-series-plastic-crusher-machine"
+                  className="inline-flex items-center px-5 py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-lg text-xs font-bold transition-all shadow-md transform hover:-translate-y-0.5"
                 >
                   Order Replacement Knives & Parts
                   <ArrowRight className="ml-1.5 w-4 h-4" />
                 </Link>
                 <Link
-                  href="/contact"
+                  href="/services/genuine-spare-parts-and-components"
                   className="inline-flex items-center px-4 py-2.5 bg-navy-850 hover:bg-navy-800 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700 transition-colors"
                 >
-                  Consult Factory Engineer
+                  View Spares Inventory Datasheet
                 </Link>
               </div>
             </div>

@@ -20,9 +20,9 @@ export const MACHINERY_PRODUCTS: MachineryProduct[] = [
     overview: 'The ABSW Series Plastic Washing Plant is an advanced, high-performance industrial washing system engineered by ABS Polymers. Featuring an innovative 10 FT compact design compared to standard 30 FT conventional lines, it delivers unmatched space efficiency, reduced power consumption, and hot friction washing that removes oil, grease, germs, labels, and chemical contaminants. Equipped with Havells 3-phase motors and a multi-stage water recycling design, the plant significantly cuts operational costs and soap oil/caustic soda requirements while maintaining spotless output flakes ready for extrusion.',
     featured: true,
     highlightBadge: '10 FT Compact Design',
-    heroImage: '/images/hero-reference.jpg',
+    heroImage: '/images/products/washing-plant-line.png',
     galleryImages: [
-      '/images/hero-reference.jpg',
+      '/images/products/washing-plant-line.png',
       '/images/hero-reference.jpg'
     ],
     brochureUrl: '/docs/abs-polymers-machinery-specifications.pdf',
@@ -257,8 +257,8 @@ export const MACHINERY_PRODUCTS: MachineryProduct[] = [
     overview: 'The G Series Plastic Crusher machine is a robust size-reduction powerhouse engineered for continuous industrial grinding of plastic scrap, regrind materials, lumps, and factory production reject. Available in capacities from 250 kg/h to 2000 kg/h, it is powered by heavy-duty 20 HP to 60 HP Havells motors and starters. The precision-machined cutting chamber and high-strength EN41 hardened steel blades ensure maximum wear resistance, clean shear cutting, minimal fines, and low operational maintenance.',
     featured: true,
     highlightBadge: 'Heavy-Duty EN41 Blades',
-    heroImage: '/images/hero-reference.jpg',
-    galleryImages: ['/images/hero-reference.jpg'],
+    heroImage: '/images/products/crusher-granulator.jpg',
+    galleryImages: ['/images/products/crusher-granulator.jpg'],
     brochureUrl: '/docs/abs-polymers-machinery-specifications.pdf',
     compatibleMaterials: ['HDPE', 'LDPE', 'PP', 'ABS', 'HIPS', 'GPPS', 'Rigid Mouldings', 'Bottles & Crates'],
     keyBenefits: [

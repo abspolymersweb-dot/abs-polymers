@@ -10,6 +10,8 @@ function ContactContent() {
   const searchParams = useSearchParams();
   const intent = searchParams.get('intent') || 'machinery_quotation';
   const product = searchParams.get('product') || '';
+  const model = searchParams.get('model') || '';
+  const part = searchParams.get('part') || '';
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -121,7 +123,9 @@ function ContactContent() {
 
             <InquiryForm
               initialProductId={product}
-              initialInquiryType={intent === 'service' ? 'service_parts' : 'machinery_quotation'}
+              initialInquiryType={intent}
+              initialModel={model}
+              initialPart={part}
             />
           </div>
         </div>
@@ -137,4 +141,3 @@ export default function ContactPage() {
     </Suspense>
   );
 }
-

@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Phone, Mail, MapPin, Clock, MessageSquare, ArrowRight, Shield, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, ArrowRight, Shield } from 'lucide-react';
 import { COMPANY_INFO } from '@/data/company';
 
 export default function Footer() {
@@ -65,12 +65,13 @@ export default function Footer() {
           {/* Brand & Corporate Overview */}
           <div className="lg:col-span-2 space-y-5">
             <Link href="/" className="inline-block">
-              <div className="relative h-12 w-48 bg-white/90 p-2 rounded-lg">
+              {/* Preserved white logo with transparent background (no white box) */}
+              <div className="relative h-12 w-52">
                 <Image
                   src="/images/logo.png"
                   alt="ABS Polymers Logo"
                   fill
-                  className="object-contain p-1"
+                  className="object-contain object-left brightness-0 invert"
                 />
               </div>
             </Link>
@@ -82,7 +83,7 @@ export default function Footer() {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2"></span>
                 Official Export Partner to the UAE & Middle East
               </div>
-              <div>Headquarters & Manufacturing: Coimbatore, Tamil Nadu, India</div>
+              <div>Headquarters & Manufacturing Works: Coimbatore, Tamil Nadu, India</div>
             </div>
           </div>
 
@@ -192,7 +193,19 @@ export default function Footer() {
 
         {/* Bottom copyright and legal */}
         <div className="mt-14 pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} ABS Polymers. All rights reserved. Coimbatore, Tamil Nadu, India.</p>
+          <p>
+            © {new Date().getFullYear()} ABS Polymers. All rights reserved.{' '}
+            <span className="mx-2">•</span>
+            Created by{' '}
+            <a
+              href="https://dawnexus.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 hover:text-brand-orange transition-colors font-medium underline underline-offset-2"
+            >
+              dawnexus.10
+            </a>
+          </p>
           <div className="flex items-center space-x-6">
             <Link href="/about" className="hover:text-slate-300">About ABS</Link>
             <Link href="/machineries" className="hover:text-slate-300">Machinery Datasheets</Link>
@@ -208,4 +221,3 @@ export default function Footer() {
     </footer>
   );
 }
-

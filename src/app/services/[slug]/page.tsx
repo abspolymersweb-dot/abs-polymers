@@ -77,6 +77,15 @@ export default async function ServiceDetailPage({
           <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
             {service.shortDescription}
           </p>
+          <div className="pt-2">
+            <a
+              href="#inquiry-form-section"
+              className="inline-flex items-center px-6 py-3 text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-md transition-all"
+            >
+              <span>{service.slug.includes('spare-parts') ? 'Order Replacement Parts' : 'Request Service Quotation'}</span>
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -131,7 +140,7 @@ export default async function ServiceDetailPage({
         </div>
 
         {/* Inquiry Form */}
-        <div>
+        <div id="inquiry-form-section" className="scroll-mt-24">
           <div className="text-center max-w-2xl mx-auto mb-8">
             <span className="text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-3 py-1 rounded-full">
               Engineering Consultation
@@ -139,11 +148,15 @@ export default async function ServiceDetailPage({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
               Inquire About {service.title}
             </h2>
+            <p className="text-slate-600 text-sm mt-1">
+              Direct factory engineering support and rapid component dispatch from Coimbatore.
+            </p>
           </div>
 
           <InquiryForm
-            initialInquiryType="service_parts"
+            initialInquiryType={service.slug.includes('spare-parts') ? 'spare_parts' : 'plant_turnkey'}
             initialProductName={service.title}
+            initialPart={service.slug.includes('spare-parts') ? 'Replacement Knife Parts (EN41 Alloy Steel)' : ''}
           />
         </div>
       </div>

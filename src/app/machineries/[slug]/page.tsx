@@ -61,6 +61,10 @@ export default async function MachineryDetailPage({
     notFound();
   }
 
+  const isContainImage =
+    product.heroImage.includes('washing-plant') ||
+    product.heroImage.includes('crusher-granulator');
+
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Breadcrumbs bar */}
@@ -101,7 +105,7 @@ export default async function MachineryDetailPage({
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <a
                 href="#inquiry-form-section"
-                className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-md shadow-lg transition-transform transform hover:-translate-y-0.5"
+                className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-lg transition-transform transform hover:-translate-y-0.5"
               >
                 <span>Request Quotation</span>
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -111,7 +115,7 @@ export default async function MachineryDetailPage({
                 <a
                   href={product.brochureUrl}
                   download
-                  className="inline-flex items-center px-5 py-3 text-sm font-semibold text-slate-200 bg-white/10 hover:bg-white/15 border border-white/20 rounded-md backdrop-blur-xs transition-colors"
+                  className="inline-flex items-center px-5 py-3 text-sm font-semibold text-slate-200 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg backdrop-blur-xs transition-colors"
                 >
                   <Download className="mr-2 w-4 h-4 text-brand-orange" />
                   <span>Download Verified Brochure (PDF)</span>
@@ -121,13 +125,13 @@ export default async function MachineryDetailPage({
           </div>
 
           <div className="lg:col-span-5">
-            <div className="relative rounded-2xl overflow-hidden border border-slate-700 bg-navy-900 shadow-2xl aspect-4/3 w-full">
+            <div className={`relative rounded-2xl overflow-hidden border border-slate-700 shadow-2xl aspect-4/3 w-full p-4 flex items-center justify-center ${isContainImage ? 'bg-slate-100' : 'bg-navy-900'}`}>
               <Image
                 src={product.heroImage}
                 alt={product.name}
                 fill
                 priority
-                className="object-cover object-center"
+                className={`${isContainImage ? 'object-contain object-center' : 'object-cover object-center'} p-2`}
               />
             </div>
           </div>
@@ -171,7 +175,7 @@ export default async function MachineryDetailPage({
                 {product.compatibleMaterials.map((mat) => (
                   <span
                     key={mat}
-                    className="px-3 py-1 bg-blue-50 text-[#04294a] text-xs font-bold rounded-lg border border-blue-200"
+                    className="px-3 py-1 bg-blue-50 text-navy-900 text-xs font-bold rounded-lg border border-blue-200"
                   >
                     {mat}
                   </span>
@@ -216,7 +220,7 @@ export default async function MachineryDetailPage({
               <a
                 href={product.brochureUrl}
                 download
-                className="inline-flex items-center px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md shrink-0"
+                className="inline-flex items-center px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg shrink-0 transition-colors"
               >
                 <Download className="w-3.5 h-3.5 mr-1.5 text-brand-orange" />
                 Original PDF Table
@@ -224,11 +228,11 @@ export default async function MachineryDetailPage({
             )}
           </div>
 
-          {/* Responsive Table */}
+          {/* High-Contrast Responsive Table */}
           <div className="overflow-x-auto border border-slate-200 rounded-xl">
             <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[700px]">
               <thead>
-                <tr className="bg-[#04294a] text-white">
+                <tr className="bg-navy-950 text-white">
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider">Model</th>
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider">Capacity (kg/h)</th>
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider">Motor Power / Electricals</th>
@@ -241,18 +245,18 @@ export default async function MachineryDetailPage({
                 {product.variants.map((v, idx) => (
                   <tr
                     key={v.modelNumber}
-                    className={`hover:bg-orange-50/50 transition-colors ${
+                    className={`hover:bg-orange-50/60 transition-colors ${
                       idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'
                     }`}
                   >
                     <td className="py-3.5 px-4 font-black text-slate-900 text-sm">
                       {v.modelNumber}
                     </td>
-                    <td className="py-3.5 px-4 font-bold text-[#04294a]">
+                    <td className="py-3.5 px-4 font-bold text-brand-orange">
                       {v.capacityKgHr} kg/h
                     </td>
-                    <td className="py-3.5 px-4 text-slate-700">
-                      <div>{v.motorPower || 'Havells 3-Phase'}</div>
+                    <td className="py-3.5 px-4 text-slate-800">
+                      <div className="font-semibold">{v.motorPower || 'Havells 3-Phase'}</div>
                       <div className="text-[11px] text-slate-500">{v.voltage || '380V 50Hz'}</div>
                     </td>
                     <td className="py-3.5 px-4 text-slate-700 font-mono text-xs">
@@ -319,4 +323,3 @@ export default async function MachineryDetailPage({
     </div>
   );
 }
-
