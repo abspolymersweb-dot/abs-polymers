@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #04294a;
+    --primary-dark: #02182c;
+    --primary-light: #0b497e;
+    --accent: #f37021;
+    --accent-hover: #d95e12;
+    --accent-light: #fff3ec;
+    --surface-bg: #f8fafc;
+    --surface-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #e2e8f0;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom industrial utilities */
+.bg-navy-950 { background-color: #031326; }
+.bg-navy-900 { background-color: #061e38; }
+.bg-navy-850 { background-color: #08284c; }
+.bg-navy-800 { background-color: #0b3461; }
+.bg-navy-700 { background-color: #124b86; }
+
+.text-navy-950 { color: #031326; }
+.text-navy-900 { color: #061e38; }
+.text-navy-800 { color: #0b3461; }
+.text-navy-700 { color: #124b86; }
+
+.text-brand-orange { color: #f37021; }
+.bg-brand-orange { background-color: #f37021; }
+.border-brand-orange { border-color: #f37021; }
+.hover\:bg-brand-orange-hover:hover { background-color: #d95e12; }
+
+/* Grid patterns & tech graphics */
+.bg-tech-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+.bg-tech-grid-light {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+}
+
+.bg-radial-glow {
+  background: radial-gradient(circle at 50% 30%, rgba(243, 112, 33, 0.15), transparent 70%);
+}
+
+.bg-navy-glow {
+  background: radial-gradient(circle at 60% 40%, rgba(18, 75, 134, 0.35), transparent 70%);
+}
