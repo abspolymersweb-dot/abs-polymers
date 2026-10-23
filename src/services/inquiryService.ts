@@ -16,7 +16,7 @@ export const inquiryService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && Array.isArray(data) && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           return data.map((r: any) => ({
             id: r.id,
             fullName: r.full_name || '',

@@ -15,22 +15,41 @@ const BACKUP_DIR = path.join(DB_DIR, 'backups');
 const DB_PATH = path.join(DB_DIR, 'abs_polymers.db');
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 
-// Ensure storage directories exist
-if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
-if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+// Ensure storage directories exist safely
+try {
+  if (typeof process !== 'undefined' && !process.env.VERCEL) {
+    if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+    if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+} catch (e) {
+  // Ignored in read-only serverless lambdas
+}
 
 // Singleton DB connection
-let dbInstance: Database.Database | null = null;
+let dbInstance: any = null;
 
-export function getDb(): Database.Database {
+export function getDb(): any {
   if (!dbInstance) {
-    dbInstance = new Database(DB_PATH);
-    dbInstance.pragma('journal_mode = WAL');
-    dbInstance.pragma('synchronous = NORMAL');
-    dbInstance.pragma('foreign_keys = ON');
-    initSchema(dbInstance);
-    seedDefaults(dbInstance);
+    try {
+      dbInstance = new Database(DB_PATH);
+      dbInstance.pragma('journal_mode = WAL');
+      dbInstance.pragma('synchronous = NORMAL');
+      dbInstance.pragma('foreign_keys = ON');
+      initSchema(dbInstance);
+      seedDefaults(dbInstance);
+    } catch (err) {
+      console.warn('SQLite init skipped/read-only (serverless mode):', err);
+      return {
+        prepare: () => ({
+          all: () => [],
+          get: () => null,
+          run: () => ({ changes: 0, lastInsertRowid: 0 })
+        }),
+        transaction: (fn: any) => fn,
+        exec: () => {}
+      };
+    }
   }
   return dbInstance;
 }
