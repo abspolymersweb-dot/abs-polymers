@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   spec_columns_json JSONB DEFAULT '[]'::jsonb,
   variants_json JSONB DEFAULT '[]'::jsonb,
   published BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -204,32 +204,42 @@ ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
 -- Public READ policies for published content
+DROP POLICY IF EXISTS "Allow public read on published products" ON public.products;
 CREATE POLICY "Allow public read on published products" ON public.products
   FOR SELECT USING (published = true);
 
+DROP POLICY IF EXISTS "Allow public read on published granules" ON public.granules;
 CREATE POLICY "Allow public read on published granules" ON public.granules
   FOR SELECT USING (published = true);
 
+DROP POLICY IF EXISTS "Allow public read on active services" ON public.services;
 CREATE POLICY "Allow public read on active services" ON public.services
   FOR SELECT USING (is_active = true);
 
+DROP POLICY IF EXISTS "Allow public read on published blogs" ON public.blogs;
 CREATE POLICY "Allow public read on published blogs" ON public.blogs
   FOR SELECT USING (status = 'published');
 
+DROP POLICY IF EXISTS "Allow public read on published destinations" ON public.destinations;
 CREATE POLICY "Allow public read on published destinations" ON public.destinations
   FOR SELECT USING (published = true);
 
+DROP POLICY IF EXISTS "Allow public read on pages" ON public.pages;
 CREATE POLICY "Allow public read on pages" ON public.pages
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow public read on site_settings" ON public.site_settings;
 CREATE POLICY "Allow public read on site_settings" ON public.site_settings
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow public read on media_assets" ON public.media_assets;
 CREATE POLICY "Allow public read on media_assets" ON public.media_assets
   FOR SELECT USING (true);
 
 -- Public INSERT policy for visitor enquiries
+DROP POLICY IF EXISTS "Allow public inquiry submissions" ON public.enquiries;
 CREATE POLICY "Allow public inquiry submissions" ON public.enquiries
   FOR INSERT WITH CHECK (true);
 
 -- Service Role Key retains full bypass permissions across all tables automatically.
+
