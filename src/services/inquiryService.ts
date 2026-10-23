@@ -1,134 +1,201 @@
 import { CustomerInquiry, InquiryStatus } from '@/types';
-
-// Initial preloaded realistic inquiries for demonstration and administrative testing
-let inMemoryInquiries: CustomerInquiry[] = [
-  {
-    id: 'inq-101',
-    fullName: 'Ahmed Al Mansoori',
-    companyName: 'Gulf Eco Plastics LLC',
-    email: 'ahmed.mansoori@gulfecoplastics.ae',
-    phone: '+971 50 123 4567',
-    country: 'United Arab Emirates (UAE)',
-    inquiryType: 'machinery_quotation',
-    productId: 'absw-washing-plant',
-    productName: 'ABSW Series Compact Plastic Washing Plant',
-    modelSelected: 'W1000 (1000 kg/h)',
-    estimatedCapacityNeeded: '1000 kg/hr',
-    materialToRecycle: 'Post-consumer HDPE bottles and PP caps',
-    message: 'We are expanding our Dubai industrial zone recycling facility. We need a quotation for the ABSW W1000 compact washing plant including CIF Jebel Ali port shipping and on-site commissioning terms.',
-    status: 'quotation_sent',
-    assignedTo: 'Export Sales Desk',
-    internalNotes: 'Quotation revision 1 dispatched via email. Client requested UAE electrical compliance 415V 50Hz confirmation.',
-    followUpDate: '2026-10-25',
-    createdAt: '2026-10-18T10:30:00Z',
-    updatedAt: '2026-10-19T14:15:00Z'
-  },
-  {
-    id: 'inq-102',
-    fullName: 'Suresh Narayanan',
-    companyName: 'Kongu Polymer Industries',
-    email: 'suresh@kongupolymers.in',
-    phone: '+91 94433 88990',
-    country: 'India',
-    inquiryType: 'machinery_quotation',
-    productId: 'g-series-crusher',
-    productName: 'G Series Plastic Crusher & Granulator',
-    modelSelected: 'G1000 (1000 kg/h, 50 HP)',
-    estimatedCapacityNeeded: '750 - 1000 kg/hr',
-    materialToRecycle: 'Rigid plastic battery crates and automotive bumpers',
-    message: 'Require heavy-duty crusher in Coimbatore. Need to test scrap cutting at your factory before placing purchase order. Please share pricing and lead time.',
-    status: 'new',
-    assignedTo: 'Domestic Sales Team',
-    internalNotes: 'Trial run requested at Coimbatore workshop.',
-    followUpDate: '2026-10-21',
-    createdAt: '2026-10-20T08:15:00Z',
-    updatedAt: '2026-10-20T08:15:00Z'
-  },
-  {
-    id: 'inq-103',
-    fullName: 'Mohamed Faisal',
-    companyName: 'Al-Rayyan Recycling Solutions',
-    email: 'faisal@alrayyanrecycling.com',
-    phone: '+971 55 987 6543',
-    country: 'United Arab Emirates (UAE)',
-    inquiryType: 'plant_turnkey',
-    productName: 'Turnkey 1500 kg/h Washing & Granulation Line',
-    estimatedCapacityNeeded: '1500 kg/hr',
-    materialToRecycle: 'LDPE agricultural film and HDPE containers',
-    message: 'Looking for a complete washing and granulation line solution with closed-loop water treatment. Please provide technical layout drawings and budget estimates.',
-    status: 'in_progress',
-    assignedTo: 'Engineering Leadership',
-    internalNotes: 'CAD plant layout proposal being prepared.',
-    followUpDate: '2026-10-24',
-    createdAt: '2026-10-15T11:00:00Z',
-    updatedAt: '2026-10-18T16:00:00Z'
-  },
-  {
-    id: 'inq-104',
-    fullName: 'Karthik Raja',
-    companyName: 'Sri Balaji Plastics',
-    email: 'karthik@balajiplastics.co.in',
-    phone: '+91 98940 33445',
-    country: 'India',
-    inquiryType: 'granules_quotation',
-    productId: 'hdpe-blow-moulding-granules',
-    productName: 'Recycled HDPE Granules (Blow Moulding Grade)',
-    estimatedCapacityNeeded: '15 Metric Tons / month',
-    materialToRecycle: 'HDPE Milky / Blue blow grade',
-    message: 'Need monthly supply of 15 MT recycled blow moulding grade HDPE granules for manufacturing lubricant oil cans. Kindly provide sample and current per kg rate.',
-    status: 'contacted',
-    assignedTo: 'Granules Desk',
-    internalNotes: '10 kg sample dispatched for testing melt flow index.',
-    followUpDate: '2026-10-23',
-    createdAt: '2026-10-17T09:20:00Z',
-    updatedAt: '2026-10-18T10:00:00Z'
-  }
-];
+import { getAllDbEnquiries, insertDbEnquiry, updateDbEnquiryStatus, deleteDbEnquiry } from '@/lib/db';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
 export const inquiryService = {
   isDatabaseConnected(): boolean {
-    return Boolean(process.env.DATABASE_URL);
+    return true;
   },
 
-  getAll(): CustomerInquiry[] {
-    return [...inMemoryInquiries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  async getAll(): Promise<CustomerInquiry[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase
+          .from('enquiries')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data.map((r: any) => ({
+            id: r.id,
+            fullName: r.full_name || '',
+            companyName: r.company_name || '',
+            email: r.email,
+            phone: r.phone,
+            country: r.country || 'India',
+            destinationCountry: r.destination_country || '',
+            destinationId: r.destination_id || '',
+            inquiryType: r.inquiry_type || 'machinery_quotation',
+            productId: r.product_id,
+            productName: r.product_name,
+            modelSelected: r.model_selected,
+            estimatedCapacityNeeded: r.estimated_capacity,
+            materialToRecycle: r.material_to_recycle,
+            message: r.message || '',
+            status: (r.status as InquiryStatus) || 'new',
+            internalNotes: r.notes || '',
+            createdAt: r.created_at || new Date().toISOString(),
+            updatedAt: r.created_at || new Date().toISOString()
+          }));
+        }
+      } catch (err) {
+        console.warn('Supabase query fallback to local SQLite:', err);
+      }
+    }
+
+    try {
+      const rows = getAllDbEnquiries();
+      return rows.map((r: any) => ({
+        id: r.id,
+        fullName: r.fullName || r.full_name || '',
+        companyName: r.companyName || r.company_name || '',
+        email: r.email,
+        phone: r.phone,
+        country: r.country || 'India',
+        destinationCountry: r.destinationCountry || r.destination_country || '',
+        destinationId: r.destinationId || r.destination_id || '',
+        inquiryType: r.inquiryType || r.inquiry_type || 'machinery_quotation',
+        productId: r.productId || r.product_id,
+        productName: r.productName || r.product_name,
+        modelSelected: r.modelSelected || r.model_selected,
+        estimatedCapacityNeeded: r.estimatedCapacityNeeded || r.estimated_capacity,
+        materialToRecycle: r.materialToRecycle || r.material_to_recycle,
+        message: r.message || '',
+        status: (r.status as InquiryStatus) || 'new',
+        internalNotes: r.notes,
+        createdAt: r.createdAt || r.created_at || new Date().toISOString(),
+        updatedAt: r.createdAt || r.created_at || new Date().toISOString()
+      }));
+    } catch (err) {
+      console.error('Failed to get inquiries:', err);
+      return [];
+    }
   },
 
-  getById(id: string): CustomerInquiry | undefined {
-    return inMemoryInquiries.find((inq) => inq.id === id);
+  async getById(id: string): Promise<CustomerInquiry | undefined> {
+    const list = await this.getAll();
+    return list.find((inq) => inq.id === id);
   },
 
-  create(data: Omit<CustomerInquiry, 'id' | 'status' | 'createdAt' | 'updatedAt'>): CustomerInquiry {
-    const newInquiry: CustomerInquiry = {
-      ...data,
-      id: `inq-${Date.now().toString(36)}`,
-      status: 'new',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    inMemoryInquiries.unshift(newInquiry);
-    return newInquiry;
-  },
+  async create(data: Omit<CustomerInquiry, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<CustomerInquiry> {
+    const id = `enq-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
 
-  updateStatus(id: string, status: InquiryStatus, internalNotes?: string, followUpDate?: string): CustomerInquiry | null {
-    const inq = inMemoryInquiries.find((item) => item.id === id);
-    if (!inq) return null;
-    inq.status = status;
-    if (internalNotes !== undefined) inq.internalNotes = internalNotes;
-    if (followUpDate !== undefined) inq.followUpDate = followUpDate;
-    inq.updatedAt = new Date().toISOString();
-    return inq;
-  },
+    // 1. Save to Supabase if configured
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { error } = await supabase.from('enquiries').insert({
+          id,
+          full_name: data.fullName,
+          company_name: data.companyName || 'Private Recycler',
+          email: data.email,
+          phone: data.phone,
+          country: data.country || 'India',
+          destination_country: data.destinationCountry || '',
+          destination_id: data.destinationId || '',
+          inquiry_type: data.inquiryType || 'machinery_quotation',
+          product_id: data.productId || '',
+          product_name: data.productName || '',
+          model_selected: data.modelSelected || '',
+          estimated_capacity: data.estimatedCapacityNeeded || '',
+          material_to_recycle: data.materialToRecycle || '',
+          message: data.message || '',
+          status: 'new',
+          notes: '',
+          created_at: now
+        });
 
-  getStats() {
+        if (error) {
+          console.warn('Supabase insert notice (will mirror to SQLite):', error.message);
+        }
+      } catch (err) {
+        console.warn('Supabase insert error (falling back to SQLite):', err);
+      }
+    }
+
+    // 2. Mirror to SQLite locally if available
+    try {
+      insertDbEnquiry({
+        fullName: data.fullName,
+        companyName: data.companyName,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        destinationCountry: data.destinationCountry,
+        destinationId: data.destinationId,
+        inquiryType: data.inquiryType,
+        productId: data.productId,
+        productName: data.productName,
+        modelSelected: data.modelSelected,
+        estimatedCapacityNeeded: data.estimatedCapacityNeeded,
+        materialToRecycle: data.materialToRecycle,
+        message: data.message
+      });
+    } catch (e) {
+      // Ephemeral on Vercel, normal
+    }
+
     return {
-      total: inMemoryInquiries.length,
-      new: inMemoryInquiries.filter((i) => i.status === 'new').length,
-      quotationSent: inMemoryInquiries.filter((i) => i.status === 'quotation_sent').length,
-      inProgress: inMemoryInquiries.filter((i) => i.status === 'in_progress').length,
-      won: inMemoryInquiries.filter((i) => i.status === 'won').length,
-      isMockMode: !this.isDatabaseConnected()
+      ...data,
+      id,
+      status: 'new',
+      createdAt: now,
+      updatedAt: now
+    };
+  },
+
+  async updateStatus(id: string, status: InquiryStatus, internalNotes?: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const payload: any = { status };
+        if (internalNotes !== undefined) payload.notes = internalNotes;
+        await supabase.from('enquiries').update(payload).eq('id', id);
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    try {
+      updateDbEnquiryStatus(id, status, internalNotes);
+    } catch (e) {
+      // Fallback
+    }
+
+    return true;
+  },
+
+  async delete(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        await supabase.from('enquiries').delete().eq('id', id);
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    try {
+      deleteDbEnquiry(id);
+    } catch (e) {
+      // Fallback
+    }
+
+    return true;
+  },
+
+  async getStats() {
+    const list = await this.getAll();
+    return {
+      total: list.length,
+      new: list.filter((i) => i.status === 'new').length,
+      quotationSent: list.filter((i) => i.status === 'quotation_sent').length,
+      inProgress: list.filter((i) => i.status === 'in_progress').length,
+      won: list.filter((i) => i.status === 'won').length,
+      isMockMode: false,
+      databaseProvider: isSupabaseConfigured() ? 'Supabase PostgreSQL (Production)' : 'SQLite (Local)'
     };
   }
 };
-

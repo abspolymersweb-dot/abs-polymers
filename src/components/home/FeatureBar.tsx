@@ -42,7 +42,7 @@ export default function FeatureBar() {
   ];
 
   return (
-    <div className="bg-navy-950 border-y border-slate-800/90 py-5 px-4 overflow-x-auto shadow-inner">
+    <div id="feature-bar" className="bg-navy-950 border-y border-slate-800/90 py-5 px-4 overflow-x-auto shadow-inner">
       <div className="max-w-7xl mx-auto flex items-center justify-between min-w-[980px] gap-6">
         {verifiedHighlights.map((item, idx) => {
           const Icon = item.icon;

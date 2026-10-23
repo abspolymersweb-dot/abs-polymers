@@ -8,11 +8,34 @@ import { ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react';
 
 interface HeroSectionProps {
   customHeroImage?: string;
+  customHero?: {
+    headline?: string;
+    headlineAccent?: string;
+    subheadline?: string;
+    primaryCtaText?: string;
+    primaryCtaLink?: string;
+    secondaryCtaText?: string;
+    secondaryCtaLink?: string;
+    heroImage?: string;
+    highlights?: string[];
+  };
 }
 
-export default function HeroSection({ customHeroImage }: HeroSectionProps) {
+export default function HeroSection({ customHeroImage, customHero }: HeroSectionProps) {
   const shouldReduceMotion = useReducedMotion();
-  const heroImageSrc = customHeroImage || '/images/hero-factory.jpg';
+  const heroImageSrc = customHero?.heroImage || customHeroImage || '/images/hero-factory.jpg';
+  const headline = customHero?.headline || 'Engineering Solutions for a';
+  const headlineAccent = customHero?.headlineAccent || 'Cleaner, Greener Tomorrow.';
+  const subheadline = customHero?.subheadline || 'Plastic recycling machinery and integrated processing solutions engineered to help businesses transform plastic waste into reusable resources.';
+  const primaryCtaText = customHero?.primaryCtaText || 'Request a Quote';
+  const primaryCtaLink = customHero?.primaryCtaLink || '/contact?intent=quote';
+  const secondaryCtaText = customHero?.secondaryCtaText || 'Explore Our Machinery';
+  const secondaryCtaLink = customHero?.secondaryCtaLink || '/machineries';
+  const highlights = customHero?.highlights || [
+    '10 FT Compact Footprint',
+    'Closed-Loop Water Recycling',
+    'Active UAE & Middle East Export'
+  ];
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -64,7 +87,7 @@ export default function HeroSection({ customHeroImage }: HeroSectionProps) {
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Main Hero Copy (unwanted tagline completely removed, layout balanced) */}
+          {/* Main Hero Copy */}
           <motion.div
             className="lg:col-span-8 space-y-7"
             variants={containerVariants}
@@ -76,9 +99,9 @@ export default function HeroSection({ customHeroImage }: HeroSectionProps) {
               variants={itemVariants}
               className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] text-white pt-2"
             >
-              Engineering Solutions for a{' '}
+              {headline}{' '}
               <span className="text-brand-orange block sm:inline underline decoration-brand-orange/40 decoration-wavy decoration-1 underline-offset-8">
-                Cleaner, Greener Tomorrow.
+                {headlineAccent}
               </span>
             </motion.h1>
 
@@ -87,7 +110,7 @@ export default function HeroSection({ customHeroImage }: HeroSectionProps) {
               variants={itemVariants}
               className="text-base sm:text-lg md:text-xl text-slate-300 leading-relaxed max-w-2xl font-normal"
             >
-              Plastic recycling machinery and integrated processing solutions engineered to help businesses transform plastic waste into reusable resources.
+              {subheadline}
             </motion.p>
 
             {/* Key Value Highlights */}
@@ -95,85 +118,85 @@ export default function HeroSection({ customHeroImage }: HeroSectionProps) {
               variants={itemVariants}
               className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs sm:text-sm text-slate-300"
             >
-              <div className="flex items-center space-x-2 bg-navy-900/80 backdrop-blur-md px-3.5 py-2.5 rounded-lg border border-slate-700/70 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-brand-orange shrink-0" />
-                <span className="font-medium text-slate-200">10 FT Compact Footprint</span>
-              </div>
-              <div className="flex items-center space-x-2 bg-navy-900/80 backdrop-blur-md px-3.5 py-2.5 rounded-lg border border-slate-700/70 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-brand-orange shrink-0" />
-                <span className="font-medium text-slate-200">Closed-Loop Water Recycling</span>
-              </div>
-              <div className="flex items-center space-x-2 bg-navy-900/80 backdrop-blur-md px-3.5 py-2.5 rounded-lg border border-slate-700/70 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-brand-orange shrink-0" />
-                <span className="font-medium text-slate-200">Active UAE & Export Despatch</span>
-              </div>
+              {highlights.map((h, i) => (
+                <div key={i} className="flex items-center space-x-2 bg-navy-900/80 backdrop-blur-md px-3.5 py-2.5 rounded-lg border border-slate-700/70 shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 text-brand-orange shrink-0" />
+                  <span className="font-medium text-slate-200">{h}</span>
+                </div>
+              ))}
             </motion.div>
 
             {/* Action Buttons */}
             <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 pt-3">
               <Link
-                href="/contact?intent=quote"
+                href={primaryCtaLink}
                 className="inline-flex items-center px-7 py-3.5 text-base font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-xl shadow-brand-orange/20 hover:shadow-brand-orange/30 transition-all duration-300 transform hover:-translate-y-0.5"
               >
-                <span>Request a Quote</span>
+                <span>{primaryCtaText}</span>
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
 
               <Link
-                href="/machineries"
-                className="inline-flex items-center px-7 py-3.5 text-base font-bold text-white bg-white/10 hover:bg-white/20 border border-white/25 rounded-lg backdrop-blur-md transition-all duration-300 transform hover:-translate-y-0.5"
+                href={secondaryCtaLink}
+                className="inline-flex items-center px-6 py-3.5 text-base font-bold text-white bg-navy-900/80 hover:bg-navy-800/90 border border-slate-700 rounded-lg shadow-md transition-all duration-300"
               >
-                <span>Explore Our Machinery</span>
+                <span>{secondaryCtaText}</span>
               </Link>
             </motion.div>
           </motion.div>
 
-          {/* Right Floating Quick Metric Panel */}
+          {/* Quick Technical Summary Card */}
           <motion.div
             className="lg:col-span-4"
             initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <div className="bg-navy-900/90 backdrop-blur-xl border border-slate-700/90 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5">
-              <div className="border-b border-slate-700/80 pb-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-brand-orange">
-                  Manufacturing Benchmarks
-                </div>
-                <div className="text-lg font-bold text-white mt-1">
-                  Built for Heavy Industrial Duty
-                </div>
+            <div className="bg-navy-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="border-b border-slate-800 pb-4">
+                <span className="text-[11px] font-bold text-brand-orange uppercase tracking-wider block mb-1">
+                  Verified Manufacturing Baseline
+                </span>
+                <h3 className="text-xl font-black text-white">
+                  Industrial Benchmark
+                </h3>
               </div>
 
-              <div className="space-y-4 text-sm">
-                <div className="flex items-start justify-between">
-                  <span className="text-slate-400">Polymer Experience</span>
-                  <span className="font-extrabold text-white text-right">35+ Years in Granules</span>
+              <div className="space-y-4 text-xs sm:text-sm">
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+                  <span className="text-slate-400">Footprint Efficiency</span>
+                  <span className="text-emerald-400 font-bold">10 FT Compact Design</span>
                 </div>
-                <div className="flex items-start justify-between">
-                  <span className="text-slate-400">Machine Engineering</span>
-                  <span className="font-extrabold text-white text-right">6+ Years Machinery</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+                  <span className="text-slate-400">Motor Power Supply</span>
+                  <span className="text-white font-bold font-mono">380V/415V 50Hz (Havells)</span>
                 </div>
-                <div className="flex items-start justify-between">
-                  <span className="text-slate-400">Motor Reliability</span>
-                  <span className="font-extrabold text-white text-right">Havells 3-Phase Motors</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+                  <span className="text-slate-400">Cutting Blade Metallurgy</span>
+                  <span className="text-white font-bold">EN41 Alloy Steel</span>
                 </div>
-                <div className="flex items-start justify-between">
-                  <span className="text-slate-400">Cutting Blades</span>
-                  <span className="font-extrabold text-white text-right">EN41 High-Carbon Steel</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+                  <span className="text-slate-400">Contact Surfaces</span>
+                  <span className="text-white font-bold">SS 302 Stainless Steel</span>
                 </div>
-                <div className="flex items-start justify-between">
-                  <span className="text-slate-400">Plant Design</span>
-                  <span className="font-extrabold text-white text-right">10 FT Compact SS 302</span>
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-slate-400">Export Despatch</span>
+                  <span className="text-brand-orange font-bold">UAE, GCC & Pan-India</span>
                 </div>
               </div>
 
               <div className="pt-2">
                 <Link
-                  href="/machineries/absw-plastic-washing-plant"
-                  className="w-full flex items-center justify-center py-2.5 px-4 bg-navy-800 hover:bg-navy-700 text-slate-200 hover:text-white rounded-lg text-xs font-bold border border-slate-600/70 transition-colors"
+                  href="/machineries"
+                  className="flex items-center justify-between text-xs font-bold text-slate-300 hover:text-white p-3 rounded-xl bg-navy-950/70 border border-slate-800 hover:border-brand-orange/50 transition-all group"
                 >
-                  View ABSW Washing Plant Specs →
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse" />
+                    Browse Machinery Lines
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange group-hover:translate-x-1 transition-all" />
                 </Link>
               </div>
             </div>
@@ -181,13 +204,18 @@ export default function HeroSection({ customHeroImage }: HeroSectionProps) {
         </div>
       </div>
 
-      {/* Restrained Scroll Down Indicator */}
-      <div className="absolute bottom-6 inset-x-0 z-20 hidden md:flex justify-center pointer-events-none">
-        <div className="flex flex-col items-center text-slate-400 text-xs tracking-wider space-y-1.5 opacity-80">
-          <span>SCROLL TO EXPLORE</span>
-          <ChevronDown className="w-4 h-4 animate-bounce text-brand-orange" />
-        </div>
-      </div>
+      {/* Subtle Scroll Down Prompt */}
+      <motion.div
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        transition={{ delay: 1, duration: 1 }}
+      >
+        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+          Explore Infrastructure
+        </span>
+        <ChevronDown className="w-4 h-4 text-brand-orange animate-bounce" />
+      </motion.div>
     </section>
   );
 }

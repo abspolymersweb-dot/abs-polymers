@@ -1,24 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, Filter, Clock, ArrowRight, Sparkles, BookOpen, User } from 'lucide-react';
 import { BLOG_POSTS } from '@/data/blogs';
+import { BlogPost } from '@/types';
 
 export default function BlogListingPage() {
+  const [posts, setPosts] = useState<BlogPost[]>(() =>
+    BLOG_POSTS.filter((p) => p.status === 'published')
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = Array.from(new Set(BLOG_POSTS.map((p) => p.category)));
+  useEffect(() => {
+    async function loadPublished() {
+      try {
+        const res = await fetch('/api/blogs?publishedOnly=true');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.blogs)) {
+          setPosts(data.blogs);
+        }
+      } catch (err) {
+        // Fallback already populated
+      }
+    }
+    loadPublished();
+  }, []);
 
-  const filteredPosts = BLOG_POSTS.filter((post) => {
+  const categories = Array.from(new Set(posts.map((p) => p.category)));
+
+  const filteredPosts = posts.filter((post) => {
     const q = searchQuery.toLowerCase().trim();
     const matchSearch =
       !q ||
       post.title.toLowerCase().includes(q) ||
       post.excerpt.toLowerCase().includes(q) ||
-      post.tags.some((t) => t.toLowerCase().includes(q));
+      (post.tags && post.tags.some((t) => t.toLowerCase().includes(q)));
 
     const matchCat = selectedCategory === 'all' || post.category === selectedCategory;
 

@@ -1,12 +1,30 @@
 import fs from 'fs';
 import path from 'path';
 import { GlobalCmsStore, CmsPageData, DEFAULT_CMS_STORE } from '@/types/cms';
+import { getDbPage, getAllDbPages, saveDbPage } from '@/lib/db';
 
 export * from '@/types/cms';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'cms-content.json');
 
 export function getCmsStore(): GlobalCmsStore {
+  try {
+    const dbPages = getAllDbPages();
+    if (Object.keys(dbPages).length > 0) {
+      return {
+        version: '2.1.0-sqlite',
+        lastUpdated: new Date().toISOString(),
+        pages: {
+          ...DEFAULT_CMS_STORE.pages,
+          ...(dbPages as any)
+        }
+      };
+    }
+  } catch (err) {
+    console.warn('SQLite read failed, attempting fallback to JSON file:', err);
+  }
+
+  // Fallback to JSON file if SQLite has an unexpected error
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
@@ -23,6 +41,7 @@ export function getCmsStore(): GlobalCmsStore {
   } catch (err) {
     console.error('Error reading CMS store file, using defaults:', err);
   }
+
   return DEFAULT_CMS_STORE;
 }
 
@@ -38,6 +57,16 @@ export function saveCmsStore(data: Partial<GlobalCmsStore>): GlobalCmsStore {
     }
   };
 
+  // 1. Save to SQLite Database
+  try {
+    for (const [slug, pageData] of Object.entries(updated.pages)) {
+      saveDbPage(slug, pageData);
+    }
+  } catch (err) {
+    console.error('Failed to save to SQLite database:', err);
+  }
+
+  // 2. Mirror to JSON file as fallback/export
   try {
     const dir = path.dirname(DATA_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -45,15 +74,28 @@ export function saveCmsStore(data: Partial<GlobalCmsStore>): GlobalCmsStore {
     }
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(updated, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Failed to persist CMS store to disk:', err);
-    throw new Error('Failed to save CMS data to persistence store.');
+    console.error('Failed to mirror CMS store to disk:', err);
   }
 
   return updated;
 }
 
 export function updatePageCms(pageKey: keyof GlobalCmsStore['pages'], pageData: CmsPageData): GlobalCmsStore {
+  try {
+    saveDbPage(pageKey, pageData);
+  } catch (err) {
+    console.error(`Failed to update page ${pageKey} in SQLite:`, err);
+  }
+
   const current = getCmsStore();
   current.pages[pageKey] = pageData;
-  return saveCmsStore(current);
+
+  // Mirror to JSON
+  try {
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(current, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Failed to mirror updated page to JSON:', err);
+  }
+
+  return current;
 }

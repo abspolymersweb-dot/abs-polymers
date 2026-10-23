@@ -15,6 +15,8 @@ interface InquiryFormProps {
   initialInquiryType?: string;
   initialModel?: string;
   initialPart?: string;
+  initialDestinationCountry?: string;
+  initialDestinationId?: string;
 }
 
 function InquiryFormInner({
@@ -22,16 +24,35 @@ function InquiryFormInner({
   initialProductName = '',
   initialInquiryType = 'machinery_quotation',
   initialModel = '',
-  initialPart = ''
+  initialPart = '',
+  initialDestinationCountry = '',
+  initialDestinationId = ''
 }: InquiryFormProps) {
   const searchParams = useSearchParams();
 
-  // Determine initial inquiry type from props or URL query
+  // Determine initial inquiry type and destination from props or URL query
   const queryIntent = searchParams?.get('intent') || '';
   const queryProduct = searchParams?.get('product') || initialProductId;
   const queryModel = searchParams?.get('model') || initialModel;
   const queryPart = searchParams?.get('part') || initialPart;
   const queryQty = searchParams?.get('quantity') || '';
+  const queryCountryParam = searchParams?.get('country') || initialDestinationCountry;
+  const destinationId = searchParams?.get('destinationId') || initialDestinationId;
+
+  // Resolve nice country name from query param if shortcode
+  const resolveCountryName = (c: string) => {
+    if (!c) return 'India';
+    const lower = c.toLowerCase();
+    if (lower === 'uae') return 'United Arab Emirates (UAE)';
+    if (lower === 'kenya') return 'Kenya';
+    if (lower === 'nigeria') return 'Nigeria';
+    if (lower === 'mexico') return 'Mexico';
+    if (lower === 'tanzania') return 'Tanzania';
+    if (lower === 'angola') return 'Angola';
+    if (lower === 'zambia') return 'Zambia';
+    if (lower === 'mozambique') return 'Mozambique';
+    return c;
+  };
 
   const resolveInquiryType = (): InquiryType => {
     if (queryIntent === 'granules' || queryIntent === 'granule_sample' || initialInquiryType === 'granules_quotation') {
@@ -63,7 +84,8 @@ function InquiryFormInner({
   const [companyName, setCompanyName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
-  const [country, setCountry] = useState<string>('India');
+  const [country, setCountry] = useState<string>(resolveCountryName(queryCountryParam));
+  const [destinationCountry, setDestinationCountry] = useState<string>(resolveCountryName(queryCountryParam));
   const [message, setMessage] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -143,6 +165,8 @@ function InquiryFormInner({
           email,
           phone,
           country,
+          destinationCountry: destinationCountry || country,
+          destinationId: destinationId || '',
           inquiryType,
           productId: selectedProduct || activeMachine?.id || activeGranule?.id || '',
           productName: resolvedProductName,

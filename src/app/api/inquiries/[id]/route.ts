@@ -9,11 +9,10 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    const updated = inquiryService.updateStatus(
+    const updated = await inquiryService.updateStatus(
       id,
       body.status,
-      body.internalNotes,
-      body.followUpDate
+      body.internalNotes
     );
 
     if (!updated) {
@@ -26,3 +25,18 @@ export async function PATCH(
   }
 }
 
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const deleted = await inquiryService.delete(id);
+    return NextResponse.json({
+      success: deleted,
+      message: deleted ? 'Inquiry deleted successfully' : 'Inquiry not found'
+    });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to delete inquiry' }, { status: 500 });
+  }
+}

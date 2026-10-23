@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Inbox,
@@ -18,11 +18,12 @@ import {
   LogOut,
   Menu,
   X,
+  Globe,
   ExternalLink,
   Shield,
-  Edit3
+  Edit3,
+  Image as ImageIcon
 } from 'lucide-react';
-import { COMPANY_INFO } from '@/data/company';
 
 export default function AdminLayout({
   children,
@@ -31,14 +32,32 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // If viewing the login page, render standalone without sidebar
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/admin/login');
+      router.refresh();
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
 
   const navItems = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Pages & CMS', href: '/admin/pages', icon: LayoutTemplate },
+    { name: 'Media Library', href: '/admin/media', icon: ImageIcon },
     { name: 'Inquiries & CRM', href: '/admin/inquiries', icon: Inbox },
     { name: 'Machineries', href: '/admin/machineries', icon: Layers },
     { name: 'Granules', href: '/admin/granules', icon: Sparkles },
     { name: 'Services', href: '/admin/services', icon: Wrench },
+    { name: 'Destinations', href: '/admin/destinations', icon: Globe },
     { name: 'Blogs & Articles', href: '/admin/blogs', icon: FileText },
     { name: 'SEO Engine', href: '/admin/seo', icon: Search },
     { name: 'Database Health', href: '/admin/db-health', icon: Activity },
@@ -96,15 +115,15 @@ export default function AdminLayout({
 
           {/* Environmental / State Banner in Sidebar */}
           <div className="px-4 py-2 bg-navy-900 border-b border-slate-800 flex items-center justify-between text-[11px]">
-            <span className="flex items-center text-amber-400 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>
-              Admin Workspace
+            <span className="flex items-center text-emerald-400 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+              SQLite CMS Live
             </span>
             <span className="text-slate-400 font-mono text-[10px]">v2.1</span>
           </div>
 
           {/* Navigation Items */}
-          <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-220px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-230px)]">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -144,9 +163,17 @@ export default function AdminLayout({
             </span>
             <span className="text-[10px] text-slate-500 font-mono">/</span>
           </Link>
+          
           <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Logged in as Admin</span>
-            <span className="text-emerald-400 font-bold">Secure</span>
+            <span className="truncate max-w-[120px]">User: admin</span>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center text-xs text-red-400 hover:text-red-300 font-semibold px-2 py-0.5 rounded hover:bg-red-500/10 transition-colors"
+              title="Log out from local CMS"
+            >
+              <LogOut className="w-3.5 h-3.5 mr-1" />
+              Logout
+            </button>
           </div>
         </div>
       </aside>

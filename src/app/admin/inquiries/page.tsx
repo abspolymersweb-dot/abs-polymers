@@ -249,7 +249,10 @@ function InquiriesContent() {
                       <div className="text-[11px] text-slate-500">{inq.modelSelected || inq.estimatedCapacityNeeded || '-'}</div>
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-700">
-                      {inq.country}
+                      <div>{inq.country}</div>
+                      {inq.destinationCountry && inq.destinationCountry !== inq.country && (
+                        <div className="text-[10px] text-brand-orange font-bold mt-0.5">Dest: {inq.destinationCountry}</div>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       <span

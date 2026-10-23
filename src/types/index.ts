@@ -116,6 +116,30 @@ export interface ServiceItem {
 
 export type InquiryStatus = 'new' | 'contacted' | 'quotation_sent' | 'in_progress' | 'won' | 'lost';
 
+export interface Destination {
+  id: string;
+  slug: string;
+  countryName: string;
+  region: string;
+  status: 'established' | 'target';
+  flagCode: string;
+  heroImage: string;
+  displayOrder: number;
+  published: boolean;
+  introTitle: string;
+  introContent: string;
+  keyApplications: string[];
+  recommendedMachinery: { name: string; slug: string; role: string }[];
+  targetMaterials: string[];
+  ctaText: string;
+  ctaLink: string;
+  metaTitle: string;
+  metaDescription: string;
+  imageAlt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CustomerInquiry {
   id: string;
   fullName: string;
@@ -123,6 +147,8 @@ export interface CustomerInquiry {
   email: string;
   phone: string;
   country: string;
+  destinationCountry?: string;
+  destinationId?: string;
   inquiryType: 'machinery_quotation' | 'granules_quotation' | 'plant_turnkey' | 'service_parts' | 'general';
   productId?: string;
   productName?: string;

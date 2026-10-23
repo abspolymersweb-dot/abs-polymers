@@ -79,66 +79,118 @@ export default function WhyChooseAndGlobalReach() {
         </div>
 
         {/* Global Reach & Facility Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-navy-900/90 border border-slate-800 rounded-2xl p-6 sm:p-10">
-          {/* Facility Location Details */}
-          <div className="lg:col-span-7 space-y-5">
-            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-cyan-400">
-              <Building className="w-4 h-4" />
-              <span>Manufacturing Headquarters & Export Desk</span>
-            </div>
-
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Supplying Recyclers Across India & the UAE
-            </h3>
-
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Operating from our dedicated machinery fabrication works in Coimbatore, Tamil Nadu, we provide full technical support, spare parts dispatch, and direct container shipping to clients in India, the UAE, and expanding Middle East territories.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 bg-navy-950/80 rounded-xl border border-slate-800 space-y-1">
-                <div className="flex items-center text-xs font-bold text-white">
-                  <MapPin className="w-4 h-4 text-brand-orange mr-1.5 shrink-0" />
-                  <span>Coimbatore, Tamil Nadu, India</span>
-                </div>
-                <div className="text-xs text-slate-400">Headquarters, Engineering & Testing Works</div>
+        <div className="bg-navy-900/90 border border-slate-800 rounded-2xl p-6 sm:p-10 space-y-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Facility Location Details */}
+            <div className="lg:col-span-7 space-y-5">
+              <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-cyan-400">
+                <Building className="w-4 h-4" />
+                <span>Manufacturing Headquarters & Export Desk</span>
               </div>
 
-              <div className="p-4 bg-navy-950/80 rounded-xl border border-slate-800 space-y-1">
-                <div className="flex items-center text-xs font-bold text-white">
-                  <Globe className="w-4 h-4 text-emerald-400 mr-1.5 shrink-0" />
-                  <span>United Arab Emirates (UAE)</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Engineering in Coimbatore. Exporting Worldwide.
+              </h3>
+
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Operating from our dedicated machinery fabrication works in Coimbatore, Tamil Nadu, we provide direct engineering support, precision trial runs, and containerized ocean shipping for industrial recyclers across the Middle East, Africa, and Latin America.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 bg-navy-950/80 rounded-xl border border-slate-800 space-y-1">
+                  <div className="flex items-center text-xs font-bold text-white">
+                    <MapPin className="w-4 h-4 text-brand-orange mr-1.5 shrink-0" />
+                    <span>Coimbatore, Tamil Nadu, India</span>
+                  </div>
+                  <div className="text-xs text-slate-400">Headquarters, Engineering & Testing Works</div>
                 </div>
-                <div className="text-xs text-slate-400">Established Export Market & Commissioned Lines</div>
+
+                <div className="p-4 bg-navy-950/80 rounded-xl border border-slate-800 space-y-1">
+                  <div className="flex items-center text-xs font-bold text-white">
+                    <Globe className="w-4 h-4 text-emerald-400 mr-1.5 shrink-0" />
+                    <span>United Arab Emirates (UAE)</span>
+                  </div>
+                  <div className="text-xs text-slate-400">Established Export Market & Commissioned Lines</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct CTA card */}
+            <div className="lg:col-span-5 bg-navy-950 rounded-xl p-6 sm:p-8 border border-slate-700/80 space-y-5">
+              <div className="text-xs font-bold uppercase tracking-wider text-brand-orange">
+                International & Domestic Orders
+              </div>
+              <div className="text-lg font-bold text-white">
+                Planning a Plant Setup or Capacity Expansion?
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Contact our engineering team with your required hourly capacity (250 kg/h to 5000 kg/h) and plastic waste stream for custom layout designs and commercial proposals.
+              </p>
+              <div className="pt-1 flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/contact?intent=quote"
+                  className="inline-flex items-center justify-center px-5 py-3 text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg transition-colors"
+                >
+                  <span>Request Project Proposal</span>
+                  <ArrowRight className="ml-1.5 w-4 h-4" />
+                </Link>
+                <Link
+                  href="/about"
+                  className="inline-flex items-center justify-center px-4 py-3 text-xs font-bold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 rounded-lg border border-slate-700 transition-colors"
+                >
+                  <span>About Our History</span>
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Direct CTA card */}
-          <div className="lg:col-span-5 bg-navy-950 rounded-xl p-6 sm:p-8 border border-slate-700/80 space-y-5">
-            <div className="text-xs font-bold uppercase tracking-wider text-brand-orange">
-              International & Domestic Orders
+          {/* International Destination Markets Grid */}
+          <div className="pt-6 border-t border-slate-800 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+                  Export Footprint & Target Expansion
+                </span>
+                <h4 className="text-lg font-bold text-white">
+                  Active Export Markets & Priority Target Corridors
+                </h4>
+              </div>
+              <span className="text-xs text-slate-400">
+                Customized voltage (380V/415V 50Hz) • Standardized replacement blades • CIF Port delivery
+              </span>
             </div>
-            <div className="text-lg font-bold text-white">
-              Planning a Plant Setup or Capacity Expansion?
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Contact our engineering team with your required hourly capacity (250 kg/h to 5000 kg/h) and plastic waste stream for custom layout designs and commercial proposals.
-            </p>
-            <div className="pt-1 flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/contact?intent=quote"
-                className="inline-flex items-center justify-center px-5 py-3 text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg transition-colors"
-              >
-                <span>Request Project Proposal</span>
-                <ArrowRight className="ml-1.5 w-4 h-4" />
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center justify-center px-4 py-3 text-xs font-bold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 rounded-lg border border-slate-700 transition-colors"
-              >
-                <span>About Our History</span>
-              </Link>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { name: 'UAE', flag: '🇦🇪', slug: 'uae', status: 'Established', color: 'emerald' },
+                { name: 'Kenya', flag: '🇰🇪', slug: 'kenya', status: 'Target Market', color: 'blue' },
+                { name: 'Nigeria', flag: '🇳🇬', slug: 'nigeria', status: 'Target Market', color: 'blue' },
+                { name: 'Mexico', flag: '🇲🇽', slug: 'mexico', status: 'Target Market', color: 'blue' },
+                { name: 'Tanzania', flag: '🇹🇿', slug: 'tanzania', status: 'Target Market', color: 'blue' },
+                { name: 'Angola', flag: '🇦🇴', slug: 'angola', status: 'Target Market', color: 'blue' },
+                { name: 'Zambia', flag: '🇿🇲', slug: 'zambia', status: 'Target Market', color: 'blue' },
+                { name: 'Mozambique', flag: '🇲🇿', slug: 'mozambique', status: 'Target Market', color: 'blue' },
+              ].map((dest, i) => (
+                <Link
+                  key={i}
+                  href={`/destinations/${dest.slug}`}
+                  className="group bg-navy-950/70 hover:bg-navy-950 border border-slate-800 hover:border-slate-700 rounded-xl p-3 flex flex-col justify-between text-center transition-all hover:scale-[1.03]"
+                >
+                  <div className="text-2xl mb-1">{dest.flag}</div>
+                  <div className="text-xs font-bold text-white group-hover:text-brand-orange transition-colors truncate">
+                    {dest.name}
+                  </div>
+                  <div
+                    className={`mt-1.5 text-[9px] font-bold uppercase tracking-wider py-0.5 rounded-full ${
+                      dest.color === 'emerald'
+                        ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/80'
+                        : 'bg-navy-900 text-slate-400 border border-slate-800'
+                    }`}
+                  >
+                    {dest.status}
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>

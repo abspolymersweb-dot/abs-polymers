@@ -28,6 +28,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { GlobalCmsStore, DEFAULT_CMS_STORE } from '@/types/cms';
+import ImagePickerModal from '@/components/admin/ImagePickerModal';
 
 type PageKey = 'home' | 'about' | 'machineries' | 'granules' | 'services' | 'blog' | 'contact' | 'footer';
 
@@ -60,6 +61,8 @@ export default function AdminPagesManager() {
 
   // Active tab within the page editor (content vs seo)
   const [editorTab, setEditorTab] = useState<'content' | 'seo' | 'images'>('content');
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<{ section: string; field: string } | null>(null);
 
   // Load from real persistence layer
   useEffect(() => {
@@ -375,16 +378,28 @@ export default function AdminPagesManager() {
                   </div>
                   <div className="space-y-2 pt-1">
                     <label className="text-[11px] font-semibold text-slate-600 block">Asset Path</label>
-                    <input
-                      type="text"
-                      value={currentPageData.sections?.hero?.heroImage || '/images/hero-factory.jpg'}
-                      onChange={(e) => {
-                        if (currentPageData.sections?.hero) {
-                          updateSectionField('hero', 'heroImage', e.target.value);
-                        }
-                      }}
-                      className="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded font-mono"
-                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={currentPageData.sections?.hero?.heroImage || '/images/hero-factory.jpg'}
+                        onChange={(e) => {
+                          if (currentPageData.sections?.hero) {
+                            updateSectionField('hero', 'heroImage', e.target.value);
+                          }
+                        }}
+                        className="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPickerTarget({ section: 'hero', field: 'heroImage' });
+                          setIsImagePickerOpen(true);
+                        }}
+                        className="px-3 py-1.5 bg-brand-orange hover:bg-orange-600 text-white font-bold text-xs rounded shadow-xs shrink-0"
+                      >
+                        Browse Media
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -716,6 +731,17 @@ export default function AdminPagesManager() {
           )}
         </div>
       </div>
+
+      {/* Image Picker Modal for Pages */}
+      <ImagePickerModal
+        isOpen={isImagePickerOpen}
+        onClose={() => setIsImagePickerOpen(false)}
+        onSelect={(url) => {
+          if (pickerTarget) {
+            updateSectionField(pickerTarget.section, pickerTarget.field, url);
+          }
+        }}
+      />
     </div>
   );
 }

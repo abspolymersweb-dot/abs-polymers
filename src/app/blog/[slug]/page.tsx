@@ -6,9 +6,18 @@ import type { Metadata } from 'next';
 import { Clock, Calendar, ChevronRight, User, ArrowLeft, Share2, ArrowRight } from 'lucide-react';
 import { BLOG_POSTS } from '@/data/blogs';
 import { COMPANY_INFO } from '@/data/company';
+import { getDbBlogBySlug, getAllDbBlogs } from '@/lib/db';
 
 export async function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({
+  try {
+    const published = getAllDbBlogs(true);
+    if (published.length > 0) {
+      return published.map((p) => ({ slug: p.slug }));
+    }
+  } catch (e) {
+    // fallback
+  }
+  return BLOG_POSTS.filter((p) => p.status === 'published').map((post) => ({
     slug: post.slug
   }));
 }
@@ -19,23 +28,34 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
-
+  let post = null;
+  try {
+    post = getDbBlogBySlug(slug, true);
+  } catch (e) {
+    // fallback
+  }
   if (!post) {
-    return { title: 'Article Not Found' };
+    post = BLOG_POSTS.find((p) => p.slug === slug && p.status === 'published');
   }
 
+  if (!post) {
+    return { title: 'Article Not Found | ABS Polymers' };
+  }
+
+  const metaTitle = post.seo?.metaTitle || post.title;
+  const metaDescription = post.seo?.metaDescription || post.excerpt;
+
   return {
-    title: `${post.seo.metaTitle} | ABS Polymers`,
-    description: post.seo.metaDescription,
-    keywords: [post.seo.primaryKeyword, ...post.seo.secondaryKeywords],
+    title: `${metaTitle} | ABS Polymers`,
+    description: metaDescription,
+    keywords: [post.seo?.primaryKeyword || '', ...(post.seo?.secondaryKeywords || [])],
     openGraph: {
-      title: post.seo.metaTitle,
-      description: post.seo.metaDescription,
+      title: metaTitle,
+      description: metaDescription,
       type: 'article',
-      publishedTime: post.publishedAt,
-      authors: [post.author.name],
-      images: [{ url: post.coverImage }]
+      publishedTime: post.publishedAt || post.published_at,
+      authors: [post.author?.name || 'ABS Polymers Engineering'],
+      images: [{ url: post.coverImage || post.cover_image || '/images/hero-factory.jpg' }]
     }
   };
 }
@@ -46,13 +66,28 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
-
+  let post = null;
+  try {
+    post = getDbBlogBySlug(slug, true);
+  } catch (e) {
+    // fallback
+  }
   if (!post) {
+    post = BLOG_POSTS.find((p) => p.slug === slug && p.status === 'published');
+  }
+
+  if (!post || post.status !== 'published') {
     notFound();
   }
 
-  const relatedPosts = BLOG_POSTS.filter((p) => p.id !== post.id).slice(0, 2);
+  let allPublished: any[] = [];
+  try {
+    allPublished = getAllDbBlogs(true);
+  } catch (e) {
+    allPublished = BLOG_POSTS.filter((p) => p.status === 'published');
+  }
+
+  const relatedPosts = allPublished.filter((p) => p.id !== post.id).slice(0, 2);
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -111,7 +146,7 @@ export default async function BlogPostPage({
         {/* Article Body Content */}
         <div className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200/90 shadow-sm">
           <div className="prose prose-slate max-w-none space-y-6 text-slate-700 leading-relaxed text-sm sm:text-base">
-            {post.content.split('\n\n').map((paragraph, pIdx) => {
+            {(post.content || '').split('\n\n').map((paragraph: string, pIdx: number) => {
               if (paragraph.startsWith('# ')) {
                 return null; // Skip H1 duplicate
               }
@@ -126,10 +161,10 @@ export default async function BlogPostPage({
                 return <hr key={pIdx} className="my-6 border-slate-200" />;
               }
               if (paragraph.startsWith('- ')) {
-                const items = paragraph.split('\n').filter((line) => line.startsWith('- '));
+                const items = paragraph.split('\n').filter((line: string) => line.startsWith('- '));
                 return (
                   <ul key={pIdx} className="space-y-2 list-disc list-inside text-sm sm:text-base">
-                    {items.map((item, iIdx) => (
+                    {items.map((item: string, iIdx: number) => (
                       <li key={iIdx} dangerouslySetInnerHTML={{ __html: item.replace('- ', '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
                     ))}
                   </ul>
@@ -147,7 +182,7 @@ export default async function BlogPostPage({
           {/* Tags */}
           <div className="mt-10 pt-6 border-t border-slate-100 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Tags:</span>
-            {post.tags.map((tag) => (
+            {(post.tags || []).map((tag: string) => (
               <span key={tag} className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-md font-medium">
                 #{tag}
               </span>

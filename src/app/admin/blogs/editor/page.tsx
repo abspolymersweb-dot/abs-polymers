@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -46,9 +46,39 @@ Recycling water through continuous filtration reduces freshwater demand, limits 
 Operating at 60°C to 80°C hot washing removes labels, mud, grease, and bacteria, preparing flakes for clean extrusion into premium granules.
   `.trim());
 
-  const [category, setCategory] = useState(existingPost?.category || 'Plastic Washing Technology');
+  const [category, setCategory] = useState(existingPost?.category || 'Plastic Recycling Technology');
   const [authorName, setAuthorName] = useState(existingPost?.author.name || 'ABS Engineering Team');
-  const [status, setStatus] = useState(existingPost?.status || 'published');
+  const [status, setStatus] = useState<'published' | 'draft'>(existingPost?.status === 'draft' ? 'draft' : 'published');
+
+  useEffect(() => {
+    async function loadFromDb() {
+      if (!slugParam) return;
+      try {
+        const res = await fetch(`/api/blogs?slug=${slugParam}`);
+        const data = await res.json();
+        if (data.success && data.blog) {
+          const b = data.blog;
+          setTitle(b.title || '');
+          setSlug(b.slug || '');
+          setExcerpt(b.excerpt || '');
+          setContent(b.content || '');
+          setCategory(b.category || 'Plastic Recycling Technology');
+          setStatus(b.status === 'draft' ? 'draft' : 'published');
+          if (b.seo) {
+            setPrimaryKeyword(b.seo.primaryKeyword || '');
+            setSecondaryKeywords(Array.isArray(b.seo.secondaryKeywords) ? b.seo.secondaryKeywords.join(', ') : '');
+            setMetaTitle(b.seo.metaTitle || '');
+            setMetaDescription(b.seo.metaDescription || '');
+            setSearchIntent(b.seo.searchIntent || 'commercial');
+            setTargetLocation(b.seo.targetLocation || 'India & UAE');
+          }
+        }
+      } catch (e) {
+        // Fallback to static
+      }
+    }
+    loadFromDb();
+  }, [slugParam]);
 
   // SEO Fields
   const [primaryKeyword, setPrimaryKeyword] = useState(existingPost?.seo.primaryKeyword || 'plastic washing plant');
@@ -131,10 +161,42 @@ Operating at 60°C to 80°C hot washing removes labels, mud, grease, and bacteri
     return { score, checks, wordCount: words };
   }, [title, metaTitle, metaDescription, content, primaryKeyword]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaveAlert(true);
-    setTimeout(() => setSaveAlert(false), 3000);
+    try {
+      const blogData = {
+        id: existingPost?.id || `blog-${Date.now().toString(36)}`,
+        slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        title,
+        excerpt,
+        content,
+        category,
+        author: { name: authorName, role: 'ABS Engineering Team' },
+        coverImage: '/images/hero-factory.jpg',
+        readingTimeMinutes: Math.max(1, Math.ceil(content.split(/\s+/).length / 200)),
+        status,
+        seo: {
+          primaryKeyword,
+          secondaryKeywords: secondaryKeywords.split(',').map((s) => s.trim()).filter(Boolean),
+          metaTitle,
+          metaDescription,
+          searchIntent,
+          targetLocation,
+          score: seoAnalysis.score
+        }
+      };
+
+      await fetch('/api/blogs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(blogData)
+      });
+
+      setSaveAlert(true);
+      setTimeout(() => setSaveAlert(false), 3000);
+    } catch (err) {
+      console.error('Failed to save blog to SQLite:', err);
+    }
   };
 
   return (
@@ -169,11 +231,30 @@ Operating at 60°C to 80°C hot washing removes labels, mud, grease, and bacteri
           </button>
           <button
             type="button"
-            onClick={handleSave}
-            className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow transition-colors"
+            onClick={() => {
+              setStatus('draft');
+              setTimeout(() => {
+                const form = document.querySelector('form');
+                if (form) form.requestSubmit();
+              }, 10);
+            }}
+            className="inline-flex items-center px-3.5 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors"
+          >
+            Save Draft
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setStatus('published');
+              setTimeout(() => {
+                const form = document.querySelector('form');
+                if (form) form.requestSubmit();
+              }, 10);
+            }}
+            className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow transition-colors"
           >
             <Save className="w-3.5 h-3.5 mr-1.5" />
-            Save & Publish
+            Publish Article
           </button>
         </div>
       </div>
@@ -230,11 +311,14 @@ Operating at 60°C to 80°C hot washing removes labels, mud, grease, and bacteri
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-semibold"
                 >
-                  <option value="Plastic Washing Technology">Plastic Washing Technology</option>
-                  <option value="Machinery Guides">Machinery Guides</option>
-                  <option value="Industrial Engineering">Industrial Engineering</option>
-                  <option value="Granules & Materials">Granules & Materials</option>
-                  <option value="Sustainability">Sustainability</option>
+                  <option value="Plastic Recycling Technology">Plastic Recycling Technology</option>
+                  <option value="Washing Plant Engineering">Washing Plant Engineering</option>
+                  <option value="Machinery and Processing">Machinery and Processing</option>
+                  <option value="Recycled Plastic Granules">Recycled Plastic Granules</option>
+                  <option value="Industrial Applications">Industrial Applications</option>
+                  <option value="Recycling Solutions">Recycling Solutions</option>
+                  <option value="International Markets">International Markets</option>
+                  <option value="Company Insights">Company Insights</option>
                 </select>
               </div>
             </div>

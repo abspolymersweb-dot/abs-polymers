@@ -1,5 +1,5 @@
 import React from 'react';
-import HeroSection from '@/components/home/HeroSection';
+import ScrollVideoHero from '@/components/home/ScrollVideoHero';
 import FeatureBar from '@/components/home/FeatureBar';
 import MachineryGrid from '@/components/home/MachineryGrid';
 import FeaturedCompactPlant from '@/components/home/FeaturedCompactPlant';
@@ -11,12 +11,16 @@ import BlogPreview from '@/components/home/BlogPreview';
 import InquiryForm from '@/components/common/InquiryForm';
 import { Phone, MessageSquare, Mail, Sparkles, ShieldCheck } from 'lucide-react';
 import { COMPANY_INFO } from '@/data/company';
+import { getCmsStore } from '@/services/cmsService';
 
 export default function HomePage() {
+  const cmsStore = getCmsStore();
+  const homeSections = cmsStore?.pages?.home?.sections || {};
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* 1. Cinematic Hero Section */}
-      <HeroSection />
+      {/* 1. Cinematic Scroll-Controlled Video Hero (Using Real Flow Footage) */}
+      <ScrollVideoHero customHero={homeSections.hero} />
 
       {/* 2. Micro Industrial Highlight Strip */}
       <FeatureBar />
