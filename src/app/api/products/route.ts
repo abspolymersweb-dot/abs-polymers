@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllDbProducts, getDbProductBySlug, saveDbProduct } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,14 +7,14 @@ export async function GET(request: NextRequest) {
     const slug = searchParams.get('slug');
 
     if (slug) {
-      const product = getDbProductBySlug(slug);
+      const product = await dataService.getProducts(slug);
       if (!product) {
         return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
       }
       return NextResponse.json({ success: true, product });
     }
 
-    const products = getAllDbProducts();
+    const products = await dataService.getProducts();
     return NextResponse.json({ success: true, count: products.length, products });
   } catch (error: any) {
     return NextResponse.json(
@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
       body.slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
-    saveDbProduct(body);
+    await dataService.saveProduct(body);
 
     return NextResponse.json({
       success: true,
-      message: 'Product saved successfully to SQLite',
+      message: 'Product saved successfully to database',
       product: body
     });
   } catch (error: any) {
@@ -57,4 +57,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

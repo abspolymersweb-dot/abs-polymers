@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getAllDbDestinations,
-  getDbDestinationBySlug,
-  saveDbDestination,
-  deleteDbDestination
-} from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,14 +8,14 @@ export async function GET(request: NextRequest) {
     const publishedOnly = searchParams.get('publishedOnly') === 'true';
 
     if (slug) {
-      const destination = getDbDestinationBySlug(slug, publishedOnly);
+      const destination = await dataService.getDestinations(slug, publishedOnly);
       if (!destination) {
         return NextResponse.json({ success: false, error: 'Destination not found' }, { status: 404 });
       }
       return NextResponse.json({ success: true, destination });
     }
 
-    const destinations = getAllDbDestinations(publishedOnly);
+    const destinations = await dataService.getDestinations(undefined, publishedOnly);
     return NextResponse.json({ success: true, count: destinations.length, destinations });
   } catch (error: any) {
     return NextResponse.json(
@@ -48,11 +43,11 @@ export async function POST(request: NextRequest) {
         .replace(/(^-|-$)/g, '');
     }
 
-    saveDbDestination(body);
+    await dataService.saveDestination(body);
 
     return NextResponse.json({
       success: true,
-      message: 'Destination saved successfully to SQLite',
+      message: 'Destination saved successfully to database',
       destination: body
     });
   } catch (error: any) {
@@ -72,7 +67,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Destination ID is required' }, { status: 400 });
     }
 
-    deleteDbDestination(id);
+    await dataService.deleteDestination(id);
 
     return NextResponse.json({
       success: true,
@@ -85,4 +80,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

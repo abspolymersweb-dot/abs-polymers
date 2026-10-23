@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllDbGranules, saveDbGranule } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const granules = getAllDbGranules();
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+
+    if (slug) {
+      const granule = await dataService.getGranules(slug);
+      if (!granule) {
+        return NextResponse.json({ success: false, error: 'Granule item not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, granule });
+    }
+
+    const granules = await dataService.getGranules();
     return NextResponse.json({ success: true, count: granules.length, granules });
   } catch (error: any) {
     return NextResponse.json(
@@ -31,11 +42,11 @@ export async function POST(request: NextRequest) {
       body.slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
-    saveDbGranule(body);
+    await dataService.saveGranule(body);
 
     return NextResponse.json({
       success: true,
-      message: 'Granule item saved successfully to SQLite',
+      message: 'Granule item saved successfully to database',
       granule: body
     });
   } catch (error: any) {
@@ -45,4 +56,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

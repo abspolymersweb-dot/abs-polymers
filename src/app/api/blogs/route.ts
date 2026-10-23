@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllDbBlogs, getDbBlogBySlug, saveDbBlog, deleteDbBlog } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,14 +8,14 @@ export async function GET(request: NextRequest) {
     const publishedOnly = searchParams.get('publishedOnly') === 'true';
 
     if (slug) {
-      const blog = getDbBlogBySlug(slug, publishedOnly);
+      const blog = await dataService.getBlogs(slug, publishedOnly);
       if (!blog) {
         return NextResponse.json({ success: false, error: 'Blog not found' }, { status: 404 });
       }
       return NextResponse.json({ success: true, blog });
     }
 
-    const blogs = getAllDbBlogs(publishedOnly);
+    const blogs = await dataService.getBlogs(undefined, publishedOnly);
     return NextResponse.json({ success: true, count: blogs.length, blogs });
   } catch (error: any) {
     return NextResponse.json(
@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
       body.slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
-    saveDbBlog(body);
+    await dataService.saveBlog(body);
 
     return NextResponse.json({
       success: true,
-      message: 'Blog post saved successfully to SQLite',
+      message: 'Blog post saved successfully to database',
       blog: body
     });
   } catch (error: any) {
@@ -64,11 +64,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Blog ID is required' }, { status: 400 });
     }
 
-    deleteDbBlog(id);
+    await dataService.deleteBlog(id);
 
     return NextResponse.json({
       success: true,
-      message: 'Blog deleted successfully'
+      message: 'Blog post deleted successfully'
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -77,4 +77,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

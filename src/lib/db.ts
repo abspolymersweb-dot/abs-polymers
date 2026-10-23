@@ -955,6 +955,26 @@ export function getAllDbGranules(): any[] {
   }));
 }
 
+export function getDbGranuleBySlug(slug: string): any | null {
+  const db = getDb();
+  const r = db.prepare('SELECT * FROM granules WHERE slug = ?').get(slug) as any;
+  if (!r) return null;
+  return {
+    ...r,
+    materialType: r.material_type,
+    colorsAvailable: JSON.parse(r.colors_json || '[]'),
+    meltFlowIndex: r.mfi,
+    tensileStrength: r.tensile_strength,
+    shortDescription: r.short_description,
+    minOrderQuantity: r.min_order_quantity,
+    verifiedSpecs: JSON.parse(r.verified_specs_json || '[]'),
+    metaTitle: r.meta_title,
+    metaDescription: r.meta_description,
+    published: Boolean(r.published),
+    applications: JSON.parse(r.applications_json || '[]')
+  };
+}
+
 export function saveDbGranule(g: any): boolean {
   const db = getDb();
   const now = new Date().toISOString();
@@ -1029,6 +1049,21 @@ export function getAllDbServices(): any[] {
     deliverables: JSON.parse(r.deliverables_json || '[]'),
     isActive: Boolean(r.is_active)
   }));
+}
+
+export function getDbServiceBySlug(slug: string): any | null {
+  const db = getDb();
+  const r = db.prepare('SELECT * FROM services WHERE slug = ?').get(slug) as any;
+  if (!r) return null;
+  return {
+    ...r,
+    shortDescription: r.short_desc,
+    fullDescription: r.full_desc,
+    iconName: r.icon,
+    processSteps: JSON.parse(r.process_steps_json || '[]'),
+    deliverables: JSON.parse(r.deliverables_json || '[]'),
+    isActive: Boolean(r.is_active)
+  };
 }
 
 export function saveDbService(s: any): boolean {

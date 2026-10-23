@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllDbServices, saveDbService } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const services = getAllDbServices();
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+
+    if (slug) {
+      const service = await dataService.getServices(slug);
+      if (!service) {
+        return NextResponse.json({ success: false, error: 'Service not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, service });
+    }
+
+    const services = await dataService.getServices();
     return NextResponse.json({ success: true, count: services.length, services });
   } catch (error: any) {
     return NextResponse.json(
@@ -18,21 +29,24 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (!body.title) {
-      return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Service title is required' },
+        { status: 400 }
+      );
     }
 
     if (!body.id) {
-      body.id = `serv-${Date.now().toString(36)}`;
+      body.id = `srv-${Date.now().toString(36)}`;
     }
     if (!body.slug) {
       body.slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
-    saveDbService(body);
+    await dataService.saveService(body);
 
     return NextResponse.json({
       success: true,
-      message: 'Service saved successfully to SQLite',
+      message: 'Service saved successfully to database',
       service: body
     });
   } catch (error: any) {
@@ -42,4 +56,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

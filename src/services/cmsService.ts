@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { GlobalCmsStore, CmsPageData, DEFAULT_CMS_STORE } from '@/types/cms';
 import { getDbPage, getAllDbPages, saveDbPage } from '@/lib/db';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
 export * from '@/types/cms';
 
@@ -66,7 +67,26 @@ export function saveCmsStore(data: Partial<GlobalCmsStore>): GlobalCmsStore {
     console.error('Failed to save to SQLite database:', err);
   }
 
-  // 2. Mirror to JSON file as fallback/export
+  // 2. Mirror to Supabase Cloud Database if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const client = getSupabaseAdmin();
+      const rows = Object.entries(updated.pages).map(([slug, pageData]) => ({
+        slug,
+        title: slug.toUpperCase(),
+        meta_title: (pageData as any).seo?.metaTitle || '',
+        meta_description: (pageData as any).seo?.metaDescription || '',
+        og_image: (pageData as any).seo?.ogImage || '',
+        sections_json: (pageData as any).sections || {},
+        updated_at: new Date().toISOString()
+      }));
+      client.from('pages').upsert(rows).then(() => {});
+    } catch (err) {
+      console.warn('Failed to mirror pages to Supabase:', err);
+    }
+  }
+
+  // 3. Mirror to JSON file as fallback/export
   try {
     const dir = path.dirname(DATA_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -85,6 +105,24 @@ export function updatePageCms(pageKey: keyof GlobalCmsStore['pages'], pageData: 
     saveDbPage(pageKey, pageData);
   } catch (err) {
     console.error(`Failed to update page ${pageKey} in SQLite:`, err);
+  }
+
+  // Mirror to Supabase
+  if (isSupabaseConfigured()) {
+    try {
+      const client = getSupabaseAdmin();
+      client.from('pages').upsert({
+        slug: pageKey,
+        title: pageKey.toUpperCase(),
+        meta_title: pageData.seo?.metaTitle || '',
+        meta_description: pageData.seo?.metaDescription || '',
+        og_image: pageData.seo?.ogImage || '',
+        sections_json: pageData.sections || {},
+        updated_at: new Date().toISOString()
+      }).then(() => {});
+    } catch (err) {
+      console.warn(`Failed to mirror page ${pageKey} to Supabase:`, err);
+    }
   }
 
   const current = getCmsStore();

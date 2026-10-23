@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllDbSettings, setDbSetting } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
 export async function GET() {
   try {
-    const settings = getAllDbSettings();
+    const settings = await dataService.getSettings();
     return NextResponse.json({ success: true, settings });
   } catch (error: any) {
     return NextResponse.json(
@@ -18,21 +18,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (body.settings && typeof body.settings === 'object') {
-      for (const [k, v] of Object.entries(body.settings)) {
-        setDbSetting(k, String(v));
-      }
+      await dataService.saveSettings(body.settings);
+      const updated = await dataService.getSettings();
       return NextResponse.json({
         success: true,
-        message: 'Settings updated successfully in SQLite',
-        settings: getAllDbSettings()
+        message: 'Settings updated successfully in database',
+        settings: updated
       });
     }
 
     if (body.key && body.value !== undefined) {
-      setDbSetting(body.key, String(body.value));
+      await dataService.saveSettings({ [body.key]: String(body.value) });
       return NextResponse.json({
         success: true,
-        message: `Setting '${body.key}' saved successfully in SQLite`
+        message: `Setting '${body.key}' saved successfully in database`
       });
     }
 
@@ -47,4 +46,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
