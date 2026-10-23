@@ -92,7 +92,7 @@ export default async function BlogPostPage({
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Breadcrumbs */}
-      <div className="bg-white border-b border-slate-200 py-3 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white border-b border-slate-200 pt-24 pb-3 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto flex items-center space-x-2 text-xs text-slate-500">
           <Link href="/" className="hover:text-brand-orange">Home</Link>
           <ChevronRight className="w-3.5 h-3.5" />

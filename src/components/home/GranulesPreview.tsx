@@ -87,18 +87,18 @@ export default function GranulesPreview() {
                 </div>
 
                 {/* Specs Box */}
-                <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 space-y-2 text-xs text-slate-600">
+                <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 space-y-2 text-xs text-slate-700">
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Grade</span>
-                    <span className="font-bold text-slate-800">{prod.grade}</span>
+                    <span className="text-slate-600 font-semibold">Grade</span>
+                    <span className="font-bold text-slate-900">{prod.grade}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Melt Flow Index</span>
-                    <span className="font-bold text-slate-800">{prod.meltFlowIndex?.split(' ')[0] || 'Lab Tested'}</span>
+                    <span className="text-slate-600 font-semibold">Melt Flow Index</span>
+                    <span className="font-bold text-slate-900">{prod.meltFlowIndex?.split(' ')[0] || 'Lab Tested'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Colors</span>
-                    <span className="font-bold text-slate-800 truncate max-w-[130px]">{prod.colorsAvailable.slice(0, 2).join(', ')}</span>
+                    <span className="text-slate-600 font-semibold">Colors</span>
+                    <span className="font-bold text-slate-900 truncate max-w-[130px]">{prod.colorsAvailable.slice(0, 2).join(', ')}</span>
                   </div>
                 </div>
 

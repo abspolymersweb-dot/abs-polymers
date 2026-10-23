@@ -52,7 +52,7 @@ export default function BlogPreview() {
                   <span className="font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-2.5 py-1 rounded-md">
                     {post.category}
                   </span>
-                  <span className="flex items-center text-slate-400">
+                  <span className="flex items-center text-slate-500 font-medium">
                     <Clock className="w-3.5 h-3.5 mr-1" />
                     {post.readingTimeMinutes} min read
                   </span>
@@ -70,7 +70,7 @@ export default function BlogPreview() {
               </div>
 
               <div className="mt-6 pt-4 border-t border-slate-200/80 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">By {post.author.name}</span>
+                <span className="text-slate-600 font-medium">By {post.author.name}</span>
                 <Link
                   href={`/blog/${post.slug}`}
                   className="inline-flex items-center font-bold text-brand-orange hover:text-brand-orange-hover"

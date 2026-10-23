@@ -184,7 +184,7 @@ export default function WhyChooseAndGlobalReach() {
                     className={`mt-1.5 text-[9px] font-bold uppercase tracking-wider py-0.5 rounded-full ${
                       dest.color === 'emerald'
                         ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/80'
-                        : 'bg-navy-900 text-slate-400 border border-slate-800'
+                        : 'bg-navy-900 text-slate-300 border border-slate-700/80'
                     }`}
                   >
                     {dest.status}

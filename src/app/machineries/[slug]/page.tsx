@@ -67,32 +67,31 @@ export default async function MachineryDetailPage({
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* Breadcrumbs bar */}
-      <div className="bg-white border-b border-slate-200 py-3 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center space-x-2 text-xs text-slate-500">
-          <Link href="/" className="hover:text-brand-orange">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <Link href="/machineries" className="hover:text-brand-orange">Machineries</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-slate-900 font-semibold truncate">{product.name}</span>
-        </div>
-      </div>
-
-      {/* Hero Header for Machine */}
-      <div className="bg-navy-950 text-white py-12 lg:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-b border-slate-800">
+      {/* Hero Header for Machine with Integrated Breadcrumbs */}
+      <div className="bg-navy-950 text-white pt-28 pb-14 sm:pt-32 sm:pb-18 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-b border-slate-800">
         <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7 space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/15 px-3 py-1 rounded-full border border-brand-orange/30">
-                {product.series}
-              </span>
-              {product.highlightBadge && (
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
-                  {product.highlightBadge}
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Breadcrumbs Navigation */}
+          <nav className="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-6">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <Link href="/machineries" className="hover:text-white transition-colors">Machineries</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <span className="text-brand-orange truncate font-semibold">{product.name}</span>
+          </nav>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/15 px-3 py-1 rounded-full border border-brand-orange/30">
+                  {product.series}
                 </span>
-              )}
-            </div>
+                {product.highlightBadge && (
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
+                    {product.highlightBadge}
+                  </span>
+                )}
+              </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
               {product.name}
@@ -137,6 +136,7 @@ export default async function MachineryDetailPage({
           </div>
         </div>
       </div>
+    </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         {/* Machine Overview & Compatible Materials */}

@@ -110,7 +110,7 @@ export default function MachineryCataloguePage() {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Header Banner */}
-      <div className="bg-navy-950 text-white py-14 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
+      <div className="bg-navy-950 text-white pt-28 pb-14 sm:pt-32 sm:pb-18 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex items-center space-x-2 text-xs font-bold text-brand-orange uppercase tracking-wider mb-2">

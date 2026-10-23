@@ -54,20 +54,19 @@ export default async function ServiceDetailPage({
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-white border-b border-slate-200 py-3 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center space-x-2 text-xs text-slate-500">
-          <Link href="/" className="hover:text-brand-orange">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <Link href="/services" className="hover:text-brand-orange">Services</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-slate-900 font-semibold truncate">{service.title}</span>
-        </div>
-      </div>
+      {/* Header with Integrated Breadcrumbs */}
+      <div className="bg-navy-950 text-white pt-28 pb-14 sm:pt-32 sm:pb-18 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto relative z-10 space-y-4">
+          {/* Breadcrumbs Navigation */}
+          <nav className="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-2">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <Link href="/services" className="hover:text-white transition-colors">Services</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <span className="text-brand-orange truncate font-semibold">{service.title}</span>
+          </nav>
 
-      {/* Header */}
-      <div className="bg-navy-950 text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto space-y-4">
           <div className="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center text-brand-orange">
             <Icon className="w-6 h-6" />
           </div>

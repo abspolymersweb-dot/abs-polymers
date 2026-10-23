@@ -73,13 +73,14 @@ const dropdownVariants: Variants = {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const isHome = pathname === '/';
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  /* Scroll listener — transparent → solid at 80 px */
+  /* Scroll listener — transparent to solid on home; always solid on inner pages */
   const handleScroll = useCallback(() => {
-    setScrolled(window.scrollY > 80);
+    setScrolled(window.scrollY > 30);
   }, []);
 
   useEffect(() => {
@@ -100,33 +101,32 @@ export default function Navbar() {
   const isActive = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(href));
 
+  // Consistent Navy navbar across the entire website eliminates contrast bugs
+  const navBackground = isHome
+    ? scrolled
+      ? 'bg-navy-950/95 backdrop-blur-md shadow-lg border-b border-slate-800/90'
+      : 'bg-navy-950/60 backdrop-blur-xs border-b border-white/10'
+    : 'bg-navy-950/98 backdrop-blur-md shadow-md border-b border-slate-800/90';
+
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/60'
-          : 'bg-transparent'
-      }`}
-    >
+    <header className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${navBackground}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* ── Logo ── */}
-          <Link href="/" className="relative flex items-center group py-2 shrink-0">
-            <div className="relative h-12 w-48 sm:h-14 sm:w-56 transition-transform duration-300 group-hover:scale-[1.02]">
+          {/* ── Brand Logo — Approved Pure White on Dark Navy ── */}
+          <Link href="/" className="relative flex items-center group py-2 shrink-0" aria-label="ABS Polymers Homepage">
+            <div className="relative h-11 w-44 sm:h-12 sm:w-52 transition-transform duration-300 group-hover:scale-[1.02]">
               <Image
                 src="/images/logo.png"
                 alt="ABS Polymers — Plastic Recycling Machinery"
                 fill
                 priority
-                className={`object-contain object-left transition-all duration-500 ${
-                  scrolled ? '' : 'brightness-0 invert'
-                }`}
+                className="object-contain object-left brightness-0 invert"
               />
             </div>
           </Link>
 
-          {/* ── Desktop Nav ── */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* ── Desktop Navigation Links ── */}
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
             {NAV_LINKS.map((link) => {
               if (link.dropdown) {
                 return (
@@ -138,14 +138,10 @@ export default function Navbar() {
                   >
                     <Link
                       href={link.href}
-                      className={`group relative flex items-center px-3 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-300 ${
-                        scrolled
-                          ? isActive(link.href)
-                            ? 'text-navy-900'
-                            : 'text-slate-700 hover:text-navy-900'
-                          : isActive(link.href)
-                            ? 'text-white'
-                            : 'text-white/85 hover:text-white'
+                      className={`group relative flex items-center px-3.5 py-2 text-[14px] font-semibold tracking-wide transition-colors duration-200 ${
+                        isActive(link.href)
+                          ? 'text-brand-orange'
+                          : 'text-slate-200 hover:text-white'
                       }`}
                     >
                       {link.name}
@@ -155,12 +151,13 @@ export default function Navbar() {
                         }`}
                       />
                       <span
-                        className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-300 origin-left ${
-                          scrolled ? 'bg-brand-orange' : 'bg-white'
-                        } ${isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                        className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-200 origin-left bg-brand-orange ${
+                          isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                        }`}
                       />
                     </Link>
 
+                    {/* Desktop Dropdown Menu */}
                     <AnimatePresence>
                       {dropdownOpen && (
                         <motion.div
@@ -168,19 +165,19 @@ export default function Navbar() {
                           initial="hidden"
                           animate="visible"
                           exit="exit"
-                          className="absolute top-full left-0 w-80 bg-white rounded-xl shadow-xl border border-slate-100 py-2 mt-2 z-50"
+                          className="absolute top-full left-0 w-84 bg-navy-900/98 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/80 py-2 mt-2 z-50 overflow-hidden"
                         >
                           {link.dropdown.map((item) => (
                             <Link
                               key={item.name}
                               href={item.href}
-                              className="block px-4 py-2.5 hover:bg-slate-50 transition-colors group/item"
+                              className="block px-4 py-3 hover:bg-navy-800/90 transition-colors group/item border-b border-slate-800/60 last:border-b-0"
                               onClick={() => setDropdownOpen(false)}
                             >
-                              <div className="text-sm font-semibold text-slate-800 group-hover/item:text-brand-orange transition-colors">
+                              <div className="text-sm font-bold text-slate-100 group-hover/item:text-brand-orange transition-colors">
                                 {item.name}
                               </div>
-                              <div className="text-xs text-slate-500 mt-0.5">{item.desc}</div>
+                              <div className="text-xs text-slate-400 mt-0.5 leading-relaxed">{item.desc}</div>
                             </Link>
                           ))}
                         </motion.div>
@@ -194,54 +191,46 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`group relative px-3 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-300 ${
-                    scrolled
-                      ? isActive(link.href)
-                        ? 'text-navy-900'
-                        : 'text-slate-700 hover:text-navy-900'
-                      : isActive(link.href)
-                        ? 'text-white'
-                        : 'text-white/85 hover:text-white'
+                  className={`group relative px-3.5 py-2 text-[14px] font-semibold tracking-wide transition-colors duration-200 ${
+                    isActive(link.href)
+                      ? 'text-brand-orange'
+                      : 'text-slate-200 hover:text-white'
                   }`}
                 >
                   {link.name}
                   <span
-                    className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-300 origin-left ${
-                      scrolled ? 'bg-brand-orange' : 'bg-white'
-                    } ${isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                    className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full transition-transform duration-200 origin-left bg-brand-orange ${
+                      isActive(link.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
                   />
                 </Link>
               );
             })}
           </nav>
 
-          {/* ── Right Actions ── */}
+          {/* ── Right Action CTA ── */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href="/contact?intent=quote"
-              className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+              className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow-md hover:shadow-orange-500/25 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
             >
               Request a Quote
               <ArrowRight className="ml-1.5 w-4 h-4" />
             </Link>
           </div>
 
-          {/* ── Mobile Controls ── */}
-          <div className="flex lg:hidden items-center gap-2">
+          {/* ── Mobile Controls (Hamburger & Quick CTA) ── */}
+          <div className="flex lg:hidden items-center gap-2.5">
             <Link
               href="/contact?intent=quote"
-              className="px-3 py-1.5 text-xs font-bold text-white bg-brand-orange rounded-md"
+              className="px-3 py-1.5 text-xs font-bold text-white bg-brand-orange rounded-md shadow-xs active:bg-orange-600"
             >
               Quote
             </Link>
             <button
               onClick={() => setMobileOpen(true)}
-              className={`p-2 rounded-md transition-colors ${
-                scrolled
-                  ? 'text-slate-700 hover:bg-slate-100'
-                  : 'text-white hover:bg-white/10'
-              }`}
-              aria-label="Open menu"
+              className="p-2 rounded-lg text-slate-200 hover:text-white hover:bg-navy-900 border border-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              aria-label="Open mobile navigation menu"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -249,7 +238,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── Mobile Full-Screen Overlay ── */}
+      {/* ── Mobile Drawer Overlay & Panel ── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -260,7 +249,8 @@ export default function Navbar() {
               animate="visible"
               exit="exit"
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-navy-950/70 backdrop-blur-sm z-40"
+              aria-hidden="true"
             />
 
             <motion.div
@@ -269,47 +259,52 @@ export default function Navbar() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl"
+              className="fixed inset-y-0 right-0 w-full max-w-sm bg-navy-950 border-l border-slate-800 z-50 flex flex-col shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile Navigation Drawer"
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              {/* Header inside mobile drawer */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-navy-900/60">
                 <Link href="/" onClick={() => setMobileOpen(false)} className="relative h-10 w-40">
                   <Image
                     src="/images/logo.png"
                     alt="ABS Polymers"
                     fill
-                    className="object-contain object-left"
+                    className="object-contain object-left brightness-0 invert"
                   />
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-md text-slate-500 hover:bg-slate-100"
+                  className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-900 transition-colors"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
+              {/* Navigation items in drawer */}
+              <div className="flex-1 overflow-y-auto px-5 py-5 space-y-1">
                 {NAV_LINKS.map((link) => (
-                  <div key={link.name}>
+                  <div key={link.name} className="py-0.5">
                     <Link
                       href={link.href}
-                      className={`block px-3 py-3 text-base font-semibold rounded-lg transition-colors ${
+                      className={`block px-3.5 py-3 text-base font-semibold rounded-lg transition-colors min-h-[44px] flex items-center ${
                         isActive(link.href)
-                          ? 'text-brand-orange bg-orange-50'
-                          : 'text-slate-800 hover:bg-slate-50 hover:text-brand-orange'
+                          ? 'text-brand-orange bg-brand-orange/15 font-bold'
+                          : 'text-slate-200 hover:bg-navy-900 hover:text-white'
                       }`}
                       onClick={() => setMobileOpen(false)}
                     >
                       {link.name}
                     </Link>
                     {link.dropdown && (
-                      <div className="pl-6 space-y-0.5 mb-1 border-l-2 border-slate-100 ml-3">
+                      <div className="pl-4 space-y-1 my-1 border-l border-slate-800 ml-4">
                         {link.dropdown.map((sub) => (
                           <Link
                             key={sub.name}
                             href={sub.href}
-                            className="block py-2 px-2 text-sm text-slate-600 hover:text-brand-orange transition-colors rounded"
+                            className="block py-2.5 px-3 text-sm text-slate-400 hover:text-brand-orange transition-colors rounded-lg min-h-[40px] flex items-center"
                             onClick={() => setMobileOpen(false)}
                           >
                             {sub.name}
@@ -321,28 +316,29 @@ export default function Navbar() {
                 ))}
               </div>
 
-              <div className="border-t border-slate-100 px-5 py-5 space-y-3 bg-slate-50">
+              {/* Bottom Actions in Drawer */}
+              <div className="border-t border-slate-800 px-5 py-5 space-y-3.5 bg-navy-900/80">
                 <Link
                   href="/contact?intent=quote"
-                  className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow transition-colors"
+                  className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow-md transition-colors min-h-[44px]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Request a Quote
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs pt-1">
                   <a
                     href={`tel:${COMPANY_INFO.contact.phone}`}
-                    className="flex items-center font-medium text-slate-700"
+                    className="flex items-center font-medium text-slate-300 hover:text-white"
                   >
-                    <Phone className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                    <Phone className="w-3.5 h-3.5 mr-1.5 text-brand-orange" />
                     {COMPANY_INFO.contact.phoneDisplay}
                   </a>
                   <a
                     href={`mailto:${COMPANY_INFO.contact.email}`}
-                    className="flex items-center font-medium text-slate-700"
+                    className="flex items-center font-medium text-slate-300 hover:text-white"
                   >
-                    <Mail className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                    <Mail className="w-3.5 h-3.5 mr-1.5 text-brand-orange" />
                     Email Us
                   </a>
                 </div>

@@ -49,6 +49,12 @@
     background-color: var(--accent);
     color: #ffffff;
   }
+
+  /* Accessible focus indicators */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 }
 
 /* ─────────────────────────────────────────────

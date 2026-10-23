@@ -14,7 +14,7 @@ export default function AboutPage() {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Hero Header */}
-      <div className="bg-navy-950 text-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
+      <div className="bg-navy-950 text-white pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <span className="text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/15 px-3 py-1 rounded-full border border-brand-orange/30">

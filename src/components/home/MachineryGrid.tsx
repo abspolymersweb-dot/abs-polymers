@@ -194,7 +194,7 @@ export default function MachineryGrid() {
                 <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
                   {item.keySpecs.map((spec, sIdx) => (
                     <div key={sIdx} className="space-y-0.5">
-                      <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                         {spec.label}
                       </div>
                       <div className="text-xs sm:text-sm font-bold text-slate-800">
