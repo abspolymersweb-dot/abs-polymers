@@ -73,6 +73,18 @@ function InquiryFormInner({
   const [selectedPart, setSelectedPart] = useState<string>(
     queryPart || (inquiryType === 'spare_parts' ? 'Replacement Knife Parts (EN41 Alloy Steel)' : '')
   );
+  const [waNumber, setWaNumber] = useState(COMPANY_INFO.contact.whatsapp);
+
+  useEffect(() => {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.settings?.whatsapp) {
+          setWaNumber(d.settings.whatsapp);
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [orderVolume, setOrderVolume] = useState<string>(queryQty || '1,000 kg (1 Metric Ton)');
   const [granuleApplication, setGranuleApplication] = useState<string>('Blow Moulding / Extrusion');
   const [materialToRecycle, setMaterialToRecycle] = useState<string>('HDPE Rigid Scrap (Bottles & Drums)');
@@ -216,7 +228,7 @@ function InquiryFormInner({
 
         <div className="pt-4 border-t border-slate-100 flex flex-wrap justify-center gap-3">
           <a
-            href={`https://wa.me/${COMPANY_INFO.contact.whatsapp.replace(/\D/g, '')}?text=Hello%20ABS%20Polymers,%20I%20have%20submitted%20inquiry%20reference%20${submittedInquiryId}%20for%20${encodeURIComponent(activeMachine?.name || selectedPart || 'machinery')}.%20Please%20review.`}
+            href={`https://wa.me/${waNumber.replace(/\D/g, '')}?text=Hello%20ABS%20Polymers,%20I%20have%20submitted%20inquiry%20reference%20${submittedInquiryId}%20for%20${encodeURIComponent(activeMachine?.name || selectedPart || 'machinery')}.%20Please%20review.`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow transition-colors"
@@ -571,7 +583,7 @@ function InquiryFormInner({
           <input
             type="tel"
             required
-            placeholder="+91 98422 12345 or +971 50..."
+            placeholder="+91 98439 40864 or +971 50..."
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-orange focus:outline-none"

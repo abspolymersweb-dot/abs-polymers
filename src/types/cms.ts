@@ -232,11 +232,11 @@ export const DEFAULT_CMS_STORE: GlobalCmsStore = {
         },
         contactDetails: {
           address: 'Coimbatore, Tamil Nadu, India',
-          phone: '+91 98422 12345',
-          phoneDisplay: '+91 98422 12345',
-          whatsapp: '+91 98422 12345',
-          whatsappDisplay: '+91 98422 12345',
-          salesEmail: 'sales@abspolymers.com',
+          phone: '+91 9843940864',
+          phoneDisplay: '+91 9843940864',
+          whatsapp: '+91 9943105810',
+          whatsappDisplay: '+91 9943105810',
+          salesEmail: 'abspolymersweb@gmail.com',
           workingHours: 'Monday – Saturday: 9:00 AM – 6:30 PM IST',
           exportDesk: 'Official Export Partner to the UAE & Middle East'
         }
@@ -250,14 +250,14 @@ export const DEFAULT_CMS_STORE: GlobalCmsStore = {
       sections: {
         companySummary: 'ABS Polymers is a premier plastic recycling machinery manufacturer and granules specialist based in Coimbatore, Tamil Nadu, India. Powered by 35+ years of polymer granule materials mastery and 6+ years of precision machine engineering.',
         factoryAddress: 'Coimbatore, Tamil Nadu, India',
-        phone: '+91 98422 12345',
-        phoneDisplay: '+91 98422 12345',
-        salesEmail: 'sales@abspolymers.com',
-        whatsapp: '+91 98422 12345',
+        phone: '+91 9843940864',
+        phoneDisplay: '+91 9843940864',
+        salesEmail: 'abspolymersweb@gmail.com',
+        whatsapp: '+91 9943105810',
         workingHours: 'Mon - Sat: 9:00 AM - 6:30 PM IST',
         copyrightText: `© ${new Date().getFullYear()} ABS Polymers. All rights reserved.`,
-        creatorText: 'Created by dawnexus.10',
-        creatorUrl: 'https://dawnexus.com'
+        creatorText: 'Created by dawnexus',
+        creatorUrl: 'https://dawnexus.in'
       }
     }
   }

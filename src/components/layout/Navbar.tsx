@@ -106,7 +106,7 @@ export default function Navbar({ companyInfo: initialCompanyInfo }: NavbarProps)
 
   const info = dynamicInfo || initialCompanyInfo || COMPANY_INFO;
   const phoneVal = info.contact?.phone || COMPANY_INFO.contact.phone;
-  const phoneDisplayVal = info.contact?.phoneDisplay || phoneVal;
+  const phoneDisplayVal = phoneVal;
   const emailVal = info.contact?.salesEmail || info.contact?.email || COMPANY_INFO.contact.salesEmail;
 
   /* Scroll listener — lightweight threshold for smooth transition */

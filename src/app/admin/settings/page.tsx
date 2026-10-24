@@ -199,7 +199,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-700 mb-1">Direct Sales Phone</label>
               <input
                 type="text"
-                value={settings.phone || '+91 98422 12345'}
+                value={settings.phone || '+91 9843940864'}
                 onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 font-mono"
               />
@@ -208,7 +208,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-700 mb-1">WhatsApp Hotline</label>
               <input
                 type="text"
-                value={settings.whatsapp || '+91 98422 12345'}
+                value={settings.whatsapp || '+91 9943105810'}
                 onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 font-mono"
               />
@@ -217,7 +217,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-700 mb-1">Sales & Quotations Email</label>
               <input
                 type="email"
-                value={settings.email || 'sales@abspolymers.com'}
+                value={settings.email || 'abspolymersweb@gmail.com'}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 font-mono"
               />
@@ -244,7 +244,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-700 mb-1">Footer Creator Attribution</label>
               <input
                 type="text"
-                value={settings.creator_attribution || 'Created by dawnexus.10'}
+                value={settings.creator_attribution || 'Created by dawnexus'}
                 onChange={(e) => setSettings({ ...settings, creator_attribution: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-brand-orange font-bold"
               />
@@ -253,7 +253,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-700 mb-1">Creator URL</label>
               <input
                 type="url"
-                value={settings.creator_url || 'https://dawnexus.com'}
+                value={settings.creator_url || 'https://dawnexus.in'}
                 onChange={(e) => setSettings({ ...settings, creator_url: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 font-mono"
               />

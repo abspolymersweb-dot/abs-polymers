@@ -722,9 +722,9 @@ export const dataService = {
       const footerPage = pages?.footer?.sections || {};
 
       const phone = settings.phone || contactDetails.phone || footerPage.phone || COMPANY_INFO.contact.phone;
-      const phoneDisplay = contactDetails.phoneDisplay || settings.phone || footerPage.phoneDisplay || COMPANY_INFO.contact.phoneDisplay;
+      const phoneDisplay = phone;
       const whatsapp = settings.whatsapp || contactDetails.whatsapp || footerPage.whatsapp || COMPANY_INFO.contact.whatsapp;
-      const whatsappDisplay = contactDetails.whatsappDisplay || settings.whatsapp || footerPage.whatsappDisplay || COMPANY_INFO.contact.whatsappDisplay;
+      const whatsappDisplay = whatsapp;
       const email = settings.email || contactDetails.salesEmail || footerPage.salesEmail || COMPANY_INFO.contact.salesEmail;
       const address = settings.factory_address || contactDetails.address || footerPage.factoryAddress || COMPANY_INFO.location.address;
       const workingHours = contactDetails.workingHours || footerPage.workingHours || COMPANY_INFO.contact.workingHours;

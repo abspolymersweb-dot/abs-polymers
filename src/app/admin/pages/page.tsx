@@ -48,7 +48,7 @@ const PAGE_NAV: PageMeta[] = [
   { key: 'services', label: 'Solutions & Services', route: '/services', icon: Wrench, description: 'Turnkey plants, EN41 knife spares, commissioning' },
   { key: 'blog', label: 'Insights & Blog', route: '/blog', icon: BookOpen, description: 'Technical articles, machinery maintenance guides' },
   { key: 'contact', label: 'Contact Desk', route: '/contact', icon: Phone, description: 'Factory address, direct phones, quotation desk' },
-  { key: 'footer', label: 'Footer & Global Elements', route: '/', icon: LayoutTemplate, description: 'Addresses, copyright, creator attribution (dawnexus.10)' },
+  { key: 'footer', label: 'Footer & Global Elements', route: '/', icon: LayoutTemplate, description: 'Addresses, copyright, creator attribution (dawnexus)' },
 ];
 
 export default function AdminPagesManager() {
@@ -98,6 +98,21 @@ export default function AdminPagesManager() {
         [fieldName]: value
       };
       updatedPages[activePage] = page;
+      return { ...prev, pages: updatedPages };
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle direct footer field updates
+  const updateFooterField = (fieldName: string, value: any) => {
+    setStore((prev) => {
+      const updatedPages = { ...prev.pages };
+      const page = { ...updatedPages.footer };
+      page.sections = {
+        ...page.sections,
+        [fieldName]: value
+      };
+      updatedPages.footer = page;
       return { ...prev, pages: updatedPages };
     });
     setHasUnsavedChanges(true);
@@ -656,8 +671,11 @@ export default function AdminPagesManager() {
                       <input
                         type="text"
                         value={currentPageData.sections.contactDetails.phone}
-                        onChange={(e) => updateSectionField('contactDetails', 'phone', e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg"
+                        onChange={(e) => {
+                          updateSectionField('contactDetails', 'phone', e.target.value);
+                          updateSectionField('contactDetails', 'phoneDisplay', e.target.value);
+                        }}
+                        className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
                       />
                     </div>
                     <div>
@@ -665,8 +683,11 @@ export default function AdminPagesManager() {
                       <input
                         type="text"
                         value={currentPageData.sections.contactDetails.whatsapp}
-                        onChange={(e) => updateSectionField('contactDetails', 'whatsapp', e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg"
+                        onChange={(e) => {
+                          updateSectionField('contactDetails', 'whatsapp', e.target.value);
+                          updateSectionField('contactDetails', 'whatsappDisplay', e.target.value);
+                        }}
+                        className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
                       />
                     </div>
                     <div>
@@ -693,18 +714,42 @@ export default function AdminPagesManager() {
                       <label className="block text-xs font-semibold text-slate-700 mb-1">Footer Corporate Summary</label>
                       <textarea
                         rows={3}
-                        value={currentPageData.sections.companySummary}
-                        onChange={(e) => updateSectionField('sections', 'companySummary', e.target.value)}
+                        value={currentPageData.sections.companySummary || ''}
+                        onChange={(e) => updateFooterField('companySummary', e.target.value)}
                         className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg"
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Footer Factory Phone</label>
+                        <input
+                          type="text"
+                          value={currentPageData.sections.phone || ''}
+                          onChange={(e) => {
+                            updateFooterField('phone', e.target.value);
+                            updateFooterField('phoneDisplay', e.target.value);
+                          }}
+                          className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Footer WhatsApp Desk</label>
+                        <input
+                          type="text"
+                          value={currentPageData.sections.whatsapp || ''}
+                          onChange={(e) => {
+                            updateFooterField('whatsapp', e.target.value);
+                            updateFooterField('whatsappDisplay', e.target.value);
+                          }}
+                          className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
+                        />
+                      </div>
+                      <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Copyright Line</label>
                         <input
                           type="text"
-                          value={currentPageData.sections.copyrightText}
-                          onChange={(e) => updateSectionField('sections', 'copyrightText', e.target.value)}
+                          value={currentPageData.sections.copyrightText || ''}
+                          onChange={(e) => updateFooterField('copyrightText', e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg"
                         />
                       </div>
@@ -712,8 +757,8 @@ export default function AdminPagesManager() {
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Creator Attribution Text</label>
                         <input
                           type="text"
-                          value={currentPageData.sections.creatorText}
-                          onChange={(e) => updateSectionField('sections', 'creatorText', e.target.value)}
+                          value={currentPageData.sections.creatorText || ''}
+                          onChange={(e) => updateFooterField('creatorText', e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-bold text-brand-orange"
                         />
                       </div>
@@ -721,8 +766,8 @@ export default function AdminPagesManager() {
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Creator Official URL</label>
                         <input
                           type="url"
-                          value={currentPageData.sections.creatorUrl}
-                          onChange={(e) => updateSectionField('sections', 'creatorUrl', e.target.value)}
+                          value={currentPageData.sections.creatorUrl || ''}
+                          onChange={(e) => updateFooterField('creatorUrl', e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
                         />
                       </div>

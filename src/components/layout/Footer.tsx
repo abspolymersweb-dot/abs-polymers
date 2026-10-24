@@ -36,9 +36,9 @@ export default function Footer({ companyInfo: initialCompanyInfo }: FooterProps)
                 contact: {
                   ...COMPANY_INFO.contact,
                   phone: s.phone || f.phone || COMPANY_INFO.contact.phone,
-                  phoneDisplay: f.phoneDisplay || s.phone || COMPANY_INFO.contact.phoneDisplay,
+                  phoneDisplay: s.phone || f.phone || COMPANY_INFO.contact.phone,
                   whatsapp: s.whatsapp || f.whatsapp || COMPANY_INFO.contact.whatsapp,
-                  whatsappDisplay: f.whatsappDisplay || s.whatsapp || COMPANY_INFO.contact.whatsappDisplay,
+                  whatsappDisplay: s.whatsapp || f.whatsapp || COMPANY_INFO.contact.whatsapp,
                   email: s.email || f.salesEmail || COMPANY_INFO.contact.salesEmail,
                   salesEmail: s.email || f.salesEmail || COMPANY_INFO.contact.salesEmail,
                   workingHours: f.workingHours || COMPANY_INFO.contact.workingHours

@@ -29,9 +29,9 @@ export default async function ContactPage() {
   const contactDetails = sections.contactDetails || {};
 
   const phone = contactDetails.phone || companyInfo.contact.phone;
-  const phoneDisplay = contactDetails.phoneDisplay || phone;
+  const phoneDisplay = phone;
   const whatsapp = contactDetails.whatsapp || companyInfo.contact.whatsapp;
-  const whatsappDisplay = contactDetails.whatsappDisplay || whatsapp;
+  const whatsappDisplay = whatsapp;
   const email = contactDetails.salesEmail || companyInfo.contact.salesEmail;
   const address = contactDetails.address || companyInfo.location.address;
   const workingHours = contactDetails.workingHours || companyInfo.contact.workingHours;

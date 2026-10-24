@@ -15,13 +15,13 @@ export const COMPANY_INFO = {
     }
   },
   contact: {
-    phone: '+91 98422 12345',
-    phoneDisplay: '+91 98422 12345',
-    whatsapp: '+919842212345',
-    whatsappDisplay: '+91 98422 12345',
-    email: 'info@abspolymers.com',
-    salesEmail: 'sales@abspolymers.com',
-    supportEmail: 'service@abspolymers.com',
+    phone: '+91 9843940864',
+    phoneDisplay: '+91 9843940864',
+    whatsapp: '+91 9943105810',
+    whatsappDisplay: '+91 9943105810',
+    email: 'abspolymersweb@gmail.com',
+    salesEmail: 'abspolymersweb@gmail.com',
+    supportEmail: 'abspolymersweb@gmail.com',
     workingHours: 'Monday – Saturday: 9:00 AM – 6:30 PM IST'
   },
   markets: {
