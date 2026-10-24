@@ -50,22 +50,23 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-    { name: 'Pages & CMS', href: '/admin/pages', icon: LayoutTemplate },
-    { name: 'Media Library', href: '/admin/media', icon: ImageIcon },
-    { name: 'Inquiries & CRM', href: '/admin/inquiries', icon: Inbox },
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Machineries', href: '/admin/machineries', icon: Layers },
     { name: 'Granules', href: '/admin/granules', icon: Sparkles },
     { name: 'Services', href: '/admin/services', icon: Wrench },
     { name: 'Destinations', href: '/admin/destinations', icon: Globe },
-    { name: 'Blogs & Articles', href: '/admin/blogs', icon: FileText },
+    { name: 'Pages & CMS', href: '/admin/pages', icon: LayoutTemplate },
+    { name: 'Media Library', href: '/admin/media', icon: ImageIcon },
     { name: 'SEO Engine', href: '/admin/seo', icon: Search },
     { name: 'Database Health', href: '/admin/db-health', icon: Activity },
-    { name: 'Settings & Integrations', href: '/admin/settings', icon: Settings },
+    { name: 'Settings & Security', href: '/admin/settings', icon: Settings },
   ];
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+      <head>
+        <meta name="robots" content="noindex, nofollow" />
+      </head>
       {/* Mobile Top Navbar */}
       <div className="md:hidden bg-navy-950 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center space-x-2">

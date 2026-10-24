@@ -2,12 +2,15 @@ import {
   getAllDbProducts,
   getDbProductBySlug,
   saveDbProduct,
+  deleteDbProduct,
   getAllDbGranules,
   getDbGranuleBySlug,
   saveDbGranule,
+  deleteDbGranule,
   getAllDbServices,
   getDbServiceBySlug,
   saveDbService,
+  deleteDbService,
   getAllDbDestinations,
   getDbDestinationBySlug,
   saveDbDestination,
@@ -23,6 +26,9 @@ import {
 } from '@/lib/db';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { Destination, BlogPost } from '@/types';
+import { MACHINERY_PRODUCTS } from '@/data/machinery';
+import { GRANULE_PRODUCTS } from '@/data/granules';
+import { SERVICES_DATA } from '@/data/services';
 
 function parseJsonField<T>(field: any, fallback: T): T {
   if (field === null || field === undefined) return fallback;
@@ -116,26 +122,48 @@ export const dataService = {
     return savedInSupabase || true;
   },
 
+  async deleteProduct(idOrSlug: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        await client.from('products').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+      } catch (err) {
+        console.warn('Supabase delete product error:', err);
+      }
+    }
+    try {
+      deleteDbProduct(idOrSlug);
+    } catch (e) {
+      // Ignored
+    }
+    return true;
+  },
+
   mapProduct(r: any) {
+    const fallback = MACHINERY_PRODUCTS.find((p) => p.slug === r.slug || p.id === r.id);
     return {
       id: r.id,
       slug: r.slug,
       name: r.name,
-      series: r.series || '',
-      category: r.category,
-      shortDescription: r.short_description || '',
-      overview: r.overview || '',
+      series: r.series || fallback?.series || '',
+      category: r.category || fallback?.category || 'crushers',
+      shortDescription: r.short_description || fallback?.shortDescription || '',
+      overview: r.overview || fallback?.overview || '',
       featured: Boolean(r.featured),
-      highlightBadge: r.highlight_badge || '',
-      heroImage: r.hero_image || '',
-      galleryImages: parseJsonField<string[]>(r.gallery_images_json, []),
-      brochureUrl: r.brochure_url || '',
-      compatibleMaterials: parseJsonField<string[]>(r.compatible_materials_json, []),
-      keyBenefits: parseJsonField<string[]>(r.key_benefits_json, []),
-      applications: parseJsonField<string[]>(r.applications_json, []),
-      specColumns: parseJsonField<string[]>(r.spec_columns_json, []),
-      variants: parseJsonField<any[]>(r.variants_json, []),
-      published: Boolean(r.published)
+      highlightBadge: r.highlight_badge || fallback?.highlightBadge || '',
+      heroImage: r.hero_image || fallback?.heroImage || '/images/products/washing-plant-line.png',
+      galleryImages: parseJsonField<string[]>(r.gallery_images_json, fallback?.galleryImages || []),
+      brochureUrl: r.brochure_url || fallback?.brochureUrl || '',
+      compatibleMaterials: parseJsonField<string[]>(r.compatible_materials_json, fallback?.compatibleMaterials || []),
+      keyBenefits: parseJsonField<string[]>(r.key_benefits_json, fallback?.keyBenefits || []),
+      applications: parseJsonField<string[]>(r.applications_json, fallback?.applications || []),
+      specColumns: parseJsonField<any[]>(r.spec_columns_json, fallback?.specColumns || []),
+      variants: parseJsonField<any[]>(r.variants_json, fallback?.variants || []),
+      verifiedSpecs: parseJsonField<any[]>(r.verified_specs_json, fallback?.verifiedSpecs || []),
+      awaitingConfirmationSpecs: parseJsonField<any[]>(r.awaiting_confirmation_specs_json, fallback?.awaitingConfirmationSpecs || []),
+      metaTitle: r.meta_title || fallback?.metaTitle || `${r.name} | ABS Polymers Coimbatore`,
+      metaDescription: r.meta_description || fallback?.metaDescription || r.short_description || '',
+      published: r.published !== false && r.published !== 0
     };
   },
 
@@ -219,29 +247,47 @@ export const dataService = {
     return savedInSupabase || true;
   },
 
+  async deleteGranule(idOrSlug: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        await client.from('granules').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+      } catch (err) {
+        console.warn('Supabase delete granule error:', err);
+      }
+    }
+    try {
+      deleteDbGranule(idOrSlug);
+    } catch (e) {
+      // Ignored
+    }
+    return true;
+  },
+
   mapGranule(r: any) {
+    const fallback = GRANULE_PRODUCTS.find((g) => g.slug === r.slug || g.id === r.id);
     return {
       id: r.id,
       slug: r.slug,
       name: r.name,
-      materialType: r.material_type,
-      grade: r.grade,
-      appearance: r.appearance || '',
-      colorsAvailable: parseJsonField<string[]>(r.colors_json, []),
-      meltFlowIndex: r.mfi || '',
-      density: r.density || '',
-      tensileStrength: r.tensile_strength || '',
-      shortDescription: r.short_description || '',
-      overview: r.overview || '',
-      applications: parseJsonField<string[]>(r.applications_json, []),
-      packaging: r.packaging || '',
-      minOrderQuantity: r.min_order_quantity || '',
-      status: r.status || 'available',
-      image: r.image || '',
-      verifiedSpecs: parseJsonField<any[]>(r.verified_specs_json, []),
-      metaTitle: r.meta_title || '',
-      metaDescription: r.meta_description || '',
-      published: Boolean(r.published)
+      materialType: r.material_type || fallback?.materialType || 'HDPE',
+      grade: r.grade || fallback?.grade || '',
+      appearance: r.appearance || fallback?.appearance || '',
+      colorsAvailable: parseJsonField<string[]>(r.colors_json, fallback?.colorsAvailable || []),
+      meltFlowIndex: r.mfi || fallback?.meltFlowIndex || '',
+      density: r.density || fallback?.density || '',
+      tensileStrength: r.tensile_strength || fallback?.tensileStrength || '',
+      shortDescription: r.short_description || fallback?.shortDescription || '',
+      overview: r.overview || fallback?.overview || '',
+      applications: parseJsonField<string[]>(r.applications_json, fallback?.applications || []),
+      packaging: r.packaging || fallback?.packaging || '',
+      minOrderQuantity: r.min_order_quantity || fallback?.minOrderQuantity || '',
+      status: r.status || fallback?.status || 'available',
+      image: r.image || fallback?.image || '/images/hero-reference.jpg',
+      verifiedSpecs: parseJsonField<any[]>(r.verified_specs_json, fallback?.verifiedSpecs || []),
+      metaTitle: r.meta_title || fallback?.metaTitle || `${r.name} | ABS Polymers`,
+      metaDescription: r.meta_description || fallback?.metaDescription || r.short_description || '',
+      published: r.published !== false && r.published !== 0
     };
   },
 
@@ -312,18 +358,38 @@ export const dataService = {
     return savedInSupabase || true;
   },
 
+  async deleteService(idOrSlug: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        await client.from('services').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+      } catch (err) {
+        console.warn('Supabase delete service error:', err);
+      }
+    }
+    try {
+      deleteDbService(idOrSlug);
+    } catch (e) {
+      // Ignored
+    }
+    return true;
+  },
+
   mapService(r: any) {
+    const fallback = SERVICES_DATA.find((s) => s.slug === r.slug || s.id === r.id);
     return {
       id: r.id,
       slug: r.slug,
       title: r.title,
-      shortDescription: r.short_desc || '',
-      fullDescription: r.full_desc || '',
-      iconName: r.icon || 'Wrench',
-      image: r.image || '',
-      processSteps: parseJsonField<string[]>(r.process_steps_json, []),
-      deliverables: parseJsonField<string[]>(r.deliverables_json, []),
-      isActive: Boolean(r.is_active)
+      shortDescription: r.short_desc || r.shortDescription || fallback?.shortDescription || '',
+      fullDescription: r.full_desc || r.fullDescription || fallback?.fullDescription || '',
+      iconName: r.icon || r.iconName || fallback?.iconName || 'Wrench',
+      image: r.image || fallback?.image || '',
+      processSteps: parseJsonField<any[]>(r.process_steps_json, fallback?.processSteps || []),
+      deliverables: parseJsonField<string[]>(r.deliverables_json, fallback?.deliverables || []),
+      isActive: r.is_active !== undefined ? Boolean(r.is_active) : (r.isActive !== undefined ? Boolean(r.isActive) : true),
+      leadTimeWeeks: r.lead_time_weeks || fallback?.leadTimeWeeks || '2-4 weeks',
+      warrantyYears: r.warranty_years || fallback?.warrantyYears || '1 year'
     };
   },
 

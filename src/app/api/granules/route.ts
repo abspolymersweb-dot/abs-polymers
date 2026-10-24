@@ -56,3 +56,26 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Granule ID or slug is required' }, { status: 400 });
+    }
+
+    await dataService.deleteGranule(id);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Granule item deleted successfully'
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to delete granule' },
+      { status: 500 }
+    );
+  }
+}

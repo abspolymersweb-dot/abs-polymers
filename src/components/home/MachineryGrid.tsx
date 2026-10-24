@@ -107,27 +107,27 @@ export default function MachineryGrid() {
   };
 
   return (
-    <section id="machinery-showcase" className="py-20 sm:py-28 bg-slate-50 border-b border-slate-200">
+    <section id="machinery-showcase" className="py-20 sm:py-28 bg-slate-50 border-b border-slate-200 text-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* Section Header with high-contrast text */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center space-x-2 text-xs font-bold text-brand-orange uppercase tracking-wider mb-3 px-3 py-1 bg-brand-orange/10 rounded-full">
+            <div className="inline-flex items-center space-x-2 text-xs font-bold text-brand-orange uppercase tracking-wider mb-3 px-3 py-1 bg-brand-orange/10 rounded-full border border-brand-orange/20">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Engineered Machinery Showcase</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-950 tracking-tight">
               Precision Plastic Recycling Machinery
             </h2>
-            <p className="mt-4 text-slate-600 text-base sm:text-lg leading-relaxed">
-              Designed and manufactured in Coimbatore for recyclers in India and overseas. Every machine is built with heavy-duty structural steel, certified Havells electricals, and verified technical capacities.
+            <p className="mt-4 text-slate-700 text-base sm:text-lg leading-relaxed font-normal">
+              Designed and manufactured in Coimbatore for industrial recyclers across India, UAE, and international corridors. Every machine features heavy structural steel frames, certified Havells electricals, and verified throughput ratings.
             </p>
           </div>
 
           <div className="shrink-0">
             <Link
               href="/machineries"
-              className="inline-flex items-center text-sm font-bold text-navy-900 hover:text-brand-orange transition-colors group"
+              className="inline-flex items-center text-sm font-bold text-navy-950 hover:text-brand-orange transition-colors group"
             >
               <span>Explore All Machinery Catalogue</span>
               <ArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
@@ -148,7 +148,7 @@ export default function MachineryGrid() {
               className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group hover:border-slate-300"
             >
               {/* Product Visual Container */}
-              <div className="relative h-64 sm:h-72 w-full bg-slate-100/80 p-4 sm:p-6 overflow-hidden flex items-center justify-center">
+              <div className="relative h-64 sm:h-72 w-full bg-slate-100/90 p-4 sm:p-6 overflow-hidden flex items-center justify-center">
                 <div className="relative w-full h-full">
                   <Image
                     src={item.image}
@@ -164,40 +164,40 @@ export default function MachineryGrid() {
 
                 {/* Badge Overlay */}
                 {item.highlightBadge && (
-                  <div className="absolute top-4 left-4 bg-navy-950/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-md border border-slate-700/60">
+                  <div className="absolute top-4 left-4 bg-navy-950 text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-md border border-slate-700/60">
                     {item.highlightBadge}
                   </div>
                 )}
 
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md text-slate-700 text-xs font-semibold px-2.5 py-1 rounded shadow-xs border border-slate-200">
+                <div className="absolute top-4 right-4 bg-white text-slate-800 text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-slate-200">
                   {item.series}
                 </div>
               </div>
 
-              {/* Product Card Details */}
+              {/* Product Card Details — All Headings Dark Slate */}
               <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
                 <div>
                   <div className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-1">
                     {item.category}
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
+                  <h3 className="text-2xl font-black text-slate-950 group-hover:text-brand-orange transition-colors">
                     <Link href={`/machineries/${item.slug}`}>
                       {item.name}
                     </Link>
                   </h3>
-                  <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+                  <p className="mt-3 text-sm text-slate-700 leading-relaxed font-normal">
                     {item.shortDesc}
                   </p>
                 </div>
 
-                {/* Key Technical Specs Grid */}
-                <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                {/* Key Technical Specs Grid — Clear Dark Text */}
+                <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                   {item.keySpecs.map((spec, sIdx) => (
                     <div key={sIdx} className="space-y-0.5">
                       <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                         {spec.label}
                       </div>
-                      <div className="text-xs sm:text-sm font-bold text-slate-800">
+                      <div className="text-xs sm:text-sm font-extrabold text-slate-950">
                         {spec.value}
                       </div>
                     </div>
@@ -208,17 +208,17 @@ export default function MachineryGrid() {
                 <div className="pt-2 flex items-center justify-between border-t border-slate-100">
                   <Link
                     href={`/machineries/${item.slug}`}
-                    className="inline-flex items-center text-sm font-bold text-brand-orange hover:text-brand-orange-hover transition-colors"
+                    className="inline-flex items-center text-sm font-bold text-brand-orange hover:text-orange-600 transition-colors"
                   >
                     <span>View Specifications</span>
                     <ArrowRight className="ml-1.5 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                   </Link>
 
                   <Link
-                    href={`/contact?intent=quote&product=${item.id}`}
-                    className="inline-flex items-center px-4 py-2 text-xs font-bold text-navy-900 bg-slate-100 hover:bg-brand-orange hover:text-white rounded-lg transition-colors"
+                    href={`/contact`}
+                    className="inline-flex items-center px-4 py-2 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-brand-orange hover:text-white rounded-lg transition-colors border border-slate-200"
                   >
-                    Request a Quote
+                    Contact Factory
                   </Link>
                 </div>
               </div>

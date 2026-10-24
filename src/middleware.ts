@@ -11,11 +11,20 @@ export function middleware(request: NextRequest) {
     if (!sessionCookie || !sessionCookie.includes('.')) {
       const loginUrl = new URL('/admin/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      redirectResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      return redirectResponse;
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Add noindex header to all admin responses
+  if (pathname.startsWith('/admin')) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
+
+  return response;
 }
 
 export const config = {

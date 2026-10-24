@@ -1,119 +1,135 @@
 import { MetadataRoute } from 'next';
-import { MACHINERY_PRODUCTS } from '@/data/machinery';
-import { GRANULE_PRODUCTS } from '@/data/granules';
-import { SERVICES_DATA } from '@/data/services';
-import { BLOG_POSTS } from '@/data/blogs';
-import { getAllDbDestinations, getAllDbBlogs } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://abspolymers.com';
+export const revalidate = 3600; // Cache sitemap for 1 hour
 
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://abspolymers.com';
+  const now = new Date();
+
+  // 1. Static Core Public Pages (excluding /admin, /blog)
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/machineries`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.9,
+      priority: 0.95,
     },
     {
       url: `${baseUrl}/granules`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 0.85,
     },
     {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
+      url: `${baseUrl}/destinations`,
+      lastModified: now,
+      changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
   ];
 
-  // Dynamic Machinery Pages (only published)
-  const machineryRoutes: MetadataRoute.Sitemap = MACHINERY_PRODUCTS.filter((m) => m.published).map((m) => ({
-    url: `${baseUrl}/machineries/${m.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.9,
-  }));
-
-  // Dynamic Granule Pages (only published)
-  const granuleRoutes: MetadataRoute.Sitemap = GRANULE_PRODUCTS.filter((g) => g.published).map((g) => ({
-    url: `${baseUrl}/granules/${g.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.85,
-  }));
-
-  // Dynamic Service Pages
-  const serviceRoutes: MetadataRoute.Sitemap = SERVICES_DATA.map((s) => ({
-    url: `${baseUrl}/services/${s.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
-
-  // Dynamic Blog Posts (from SQLite, strictly published only)
-  let publishedBlogs: any[] = [];
+  // 2. Dynamic Machinery Pages (Published only from database)
+  let machineryRoutes: MetadataRoute.Sitemap = [];
   try {
-    publishedBlogs = getAllDbBlogs(true);
-  } catch (e) {
-    publishedBlogs = BLOG_POSTS.filter((b) => b.status === 'published');
+    const products = await dataService.getProducts();
+    if (Array.isArray(products)) {
+      machineryRoutes = products
+        .filter((m: any) => m.published !== false && m.slug)
+        .map((m: any) => ({
+          url: `${baseUrl}/machineries/${m.slug}`,
+          lastModified: m.updated_at ? new Date(m.updated_at) : now,
+          changeFrequency: 'weekly',
+          priority: 0.9,
+        }));
+    }
+  } catch (err) {
+    console.warn('Sitemap machinery fetch error:', err);
   }
 
-  const blogRoutes: MetadataRoute.Sitemap = publishedBlogs.map((b) => ({
-    url: `${baseUrl}/blog/${b.slug}`,
-    lastModified: new Date(b.publishedAt || b.published_at || new Date()),
-    changeFrequency: 'monthly',
-    priority: 0.75,
-  }));
-
-  // Dynamic Destination Pages (from SQLite, strictly published only)
-  let publishedDestinations: any[] = [];
+  // 3. Dynamic Granules Pages (Published only from database)
+  let granuleRoutes: MetadataRoute.Sitemap = [];
   try {
-    publishedDestinations = getAllDbDestinations(true);
-  } catch (e) {
-    // safe fallback
+    const granules = await dataService.getGranules();
+    if (Array.isArray(granules)) {
+      granuleRoutes = granules
+        .filter((g: any) => g.published !== false && g.slug)
+        .map((g: any) => ({
+          url: `${baseUrl}/granules/${g.slug}`,
+          lastModified: g.updated_at ? new Date(g.updated_at) : now,
+          changeFrequency: 'weekly',
+          priority: 0.85,
+        }));
+    }
+  } catch (err) {
+    console.warn('Sitemap granules fetch error:', err);
   }
 
-  const destinationRoutes: MetadataRoute.Sitemap = publishedDestinations.map((d) => ({
-    url: `${baseUrl}/destinations/${d.slug}`,
-    lastModified: new Date(d.updatedAt || new Date()),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
+  // 4. Dynamic Services Pages (Active only from database)
+  let serviceRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const services = await dataService.getServices();
+    if (Array.isArray(services)) {
+      serviceRoutes = services
+        .filter((s: any) => s.isActive !== false && s.slug)
+        .map((s: any) => ({
+          url: `${baseUrl}/services/${s.slug}`,
+          lastModified: s.updated_at ? new Date(s.updated_at) : now,
+          changeFrequency: 'monthly',
+          priority: 0.8,
+        }));
+    }
+  } catch (err) {
+    console.warn('Sitemap services fetch error:', err);
+  }
+
+  // 5. Dynamic Global Destinations (Published only from database)
+  let destinationRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const destinations = await dataService.getDestinations(undefined, true);
+    if (Array.isArray(destinations)) {
+      destinationRoutes = destinations
+        .filter((d: any) => d.slug)
+        .map((d: any) => ({
+          url: `${baseUrl}/destinations/${d.slug}`,
+          lastModified: d.updated_at ? new Date(d.updated_at) : now,
+          changeFrequency: 'weekly',
+          priority: 0.85,
+        }));
+    }
+  } catch (err) {
+    console.warn('Sitemap destinations fetch error:', err);
+  }
 
   return [
     ...staticRoutes,
     ...machineryRoutes,
     ...granuleRoutes,
     ...serviceRoutes,
-    ...blogRoutes,
     ...destinationRoutes,
   ];
 }
-

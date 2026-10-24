@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -81,31 +81,51 @@ const SOLUTION_STAGES = [
 ];
 
 export default function MachineryCataloguePage() {
+  const [productsList, setProductsList] = useState<any[]>(MACHINERY_PRODUCTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [activeStage, setActiveStage] = useState(0);
 
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.products)) {
+          const publishedOnly = data.products.filter((p: any) => p.published !== false);
+          if (publishedOnly.length > 0) {
+            setProductsList(publishedOnly);
+          }
+        }
+      })
+      .catch((err) => console.warn('Failed to load dynamic machinery:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    return MACHINERY_PRODUCTS.filter((prod) => {
+    return productsList.filter((prod) => {
       const q = searchQuery.toLowerCase().trim();
       const matchQuery =
         !q ||
         prod.name.toLowerCase().includes(q) ||
-        prod.series.toLowerCase().includes(q) ||
-        prod.shortDescription.toLowerCase().includes(q) ||
-        prod.variants.some((v) => v.modelNumber.toLowerCase().includes(q)) ||
-        prod.compatibleMaterials.some((m) => m.toLowerCase().includes(q));
+        (prod.series || '').toLowerCase().includes(q) ||
+        (prod.shortDescription || '').toLowerCase().includes(q) ||
+        (prod.variants || []).some((v: any) => (v.modelNumber || '').toLowerCase().includes(q)) ||
+        (prod.compatibleMaterials || []).some((m: string) => m.toLowerCase().includes(q));
 
       const matchCat = selectedCategory === 'all' || prod.category === selectedCategory;
 
       return matchQuery && matchCat;
     }).sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'variants') return b.variants.length - a.variants.length;
+      if (sortBy === 'variants') return (b.variants?.length || 0) - (a.variants?.length || 0);
       return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
     });
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [productsList, searchQuery, selectedCategory, sortBy]);
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -242,7 +262,7 @@ export default function MachineryCataloguePage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              All Machinery ({MACHINERY_PRODUCTS.length})
+              All Machinery ({productsList.length})
             </button>
             {MACHINERY_CATEGORIES.map((cat) => (
               <button
@@ -337,7 +357,7 @@ export default function MachineryCataloguePage() {
                           Verified Technical Benchmarks
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs text-slate-700">
-                          {product.verifiedSpecs.slice(0, 4).map((spec, sIdx) => (
+                          {(product.verifiedSpecs || []).slice(0, 4).map((spec: any, sIdx: number) => (
                             <div key={sIdx} className="flex items-start">
                               <CheckCircle2 className="w-3.5 h-3.5 text-brand-orange mr-1.5 shrink-0 mt-0.5" />
                               <span><strong>{spec.label}:</strong> {spec.value}</span>
@@ -349,7 +369,7 @@ export default function MachineryCataloguePage() {
                       {/* Model numbers quick pills */}
                       <div className="mt-4 flex flex-wrap items-center gap-1.5">
                         <span className="text-xs font-semibold text-slate-500 mr-1">Available Models:</span>
-                        {product.variants.map((v) => (
+                        {(product.variants || []).map((v: any) => (
                           <span
                             key={v.modelNumber}
                             className="text-[11px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200"

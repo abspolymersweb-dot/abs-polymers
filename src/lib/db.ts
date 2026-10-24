@@ -935,6 +935,12 @@ export function saveDbProduct(prod: any): boolean {
   return true;
 }
 
+export function deleteDbProduct(idOrSlug: string): boolean {
+  const db = getDb();
+  db.prepare('DELETE FROM products WHERE id = ? OR slug = ?').run(idOrSlug, idOrSlug);
+  return true;
+}
+
 // Granules
 export function getAllDbGranules(): any[] {
   const db = getDb();
@@ -1036,6 +1042,12 @@ export function saveDbGranule(g: any): boolean {
   return true;
 }
 
+export function deleteDbGranule(idOrSlug: string): boolean {
+  const db = getDb();
+  db.prepare('DELETE FROM granules WHERE id = ? OR slug = ?').run(idOrSlug, idOrSlug);
+  return true;
+}
+
 // Services
 export function getAllDbServices(): any[] {
   const db = getDb();
@@ -1099,6 +1111,12 @@ export function saveDbService(s: any): boolean {
     s.created_at || now,
     now
   );
+  return true;
+}
+
+export function deleteDbService(idOrSlug: string): boolean {
+  const db = getDb();
+  db.prepare('DELETE FROM services WHERE id = ? OR slug = ?').run(idOrSlug, idOrSlug);
   return true;
 }
 

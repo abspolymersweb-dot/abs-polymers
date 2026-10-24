@@ -2,9 +2,22 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { CheckCircle2, ChevronRight, ArrowRight, Factory, Settings, Wrench, Package, Headphones } from 'lucide-react';
-import { SERVICES_DATA } from '@/data/services';
-import InquiryForm from '@/components/common/InquiryForm';
+import {
+  CheckCircle2,
+  ChevronRight,
+  ArrowRight,
+  Factory,
+  Settings,
+  Wrench,
+  Package,
+  Headphones,
+  Phone,
+  MessageSquare,
+  Mail,
+  MapPin
+} from 'lucide-react';
+import { dataService } from '@/services/dataService';
+import { COMPANY_INFO } from '@/data/company';
 
 const iconMap: Record<string, React.ElementType> = {
   Factory,
@@ -15,9 +28,12 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export async function generateStaticParams() {
-  return SERVICES_DATA.map((srv) => ({
-    slug: srv.slug
-  }));
+  const services = await dataService.getServices();
+  return (services || [])
+    .filter((srv: any) => srv.isActive !== false)
+    .map((srv: any) => ({
+      slug: srv.slug
+    }));
 }
 
 export async function generateMetadata({
@@ -26,10 +42,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params;
-  const service = SERVICES_DATA.find((s) => s.slug === slug);
+  const service = await dataService.getServices(slug);
 
-  if (!service) {
-    return { title: 'Service Not Found' };
+  if (!service || service.isActive === false) {
+    return { title: 'Service Not Found | ABS Polymers' };
   }
 
   return {
@@ -44,13 +60,16 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const service = SERVICES_DATA.find((s) => s.slug === slug);
+  const service = await dataService.getServices(slug);
 
-  if (!service) {
+  if (!service || service.isActive === false) {
     notFound();
   }
 
   const Icon = iconMap[service.iconName] || Factory;
+  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const waUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers,%20I%20am%20inquiring%20about%20your%20service:%20${encodeURIComponent(service.title)}.`;
+  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Service%20Consultation%20Request:%20${encodeURIComponent(service.title)}&body=Dear%20ABS%20Polymers%20Team,%0A%0AI%20would%20like%20to%20consult%20regarding%20${encodeURIComponent(service.title)}.%0A%0ACompany%20Name:%0ARequirement%20Details:%0ALocation:%0APhone%20Number:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -78,10 +97,10 @@ export default async function ServiceDetailPage({
           </p>
           <div className="pt-2">
             <a
-              href="#inquiry-form-section"
+              href="#factory-desk"
               className="inline-flex items-center px-6 py-3 text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-lg shadow-md transition-all"
             >
-              <span>{service.slug.includes('spare-parts') ? 'Order Replacement Parts' : 'Request Service Quotation'}</span>
+              <span>{service.slug.includes('spare-parts') ? 'Order Replacement Parts' : 'Consult Engineering Desk'}</span>
               <ArrowRight className="ml-2 w-4 h-4" />
             </a>
           </div>
@@ -99,67 +118,138 @@ export default async function ServiceDetailPage({
             </p>
 
             {/* Detailed Process Steps */}
-            <div className="space-y-4 pt-4">
-              <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider text-xs">
-                Step-by-Step Delivery Process
-              </h3>
-              <div className="space-y-3">
-                {service.processSteps.map((step) => (
-                  <div key={step.step} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-6 h-6 rounded-full bg-[#04294a] text-white text-xs font-bold flex items-center justify-center">
-                        {step.step}
-                      </span>
-                      <h4 className="text-sm font-bold text-slate-900">{step.title}</h4>
+            {service.processSteps && service.processSteps.length > 0 && (
+              <div className="space-y-4 pt-4">
+                <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider text-xs">
+                  Step-by-Step Delivery Process
+                </h3>
+                <div className="space-y-3">
+                  {service.processSteps.map((step: any, sIdx: number) => (
+                    <div key={step.step || sIdx} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-6 h-6 rounded-full bg-[#04294a] text-white text-xs font-bold flex items-center justify-center">
+                          {step.step || sIdx + 1}
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900">{step.title}</h4>
+                      </div>
+                      <p className="mt-2 text-xs sm:text-sm text-slate-600 pl-8 leading-relaxed">
+                        {step.description}
+                      </p>
                     </div>
-                    <p className="mt-2 text-xs sm:text-sm text-slate-600 pl-8 leading-relaxed">
-                      {step.description}
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
-                Key Deliverables
-              </h3>
-              <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
-                {service.deliverables.map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+            {service.deliverables && service.deliverables.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+                  Key Deliverables
+                </h3>
+                <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
+                  {service.deliverables.map((item: string, idx: number) => (
+                    <li key={idx} className="flex items-start">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-3 text-xs text-slate-600">
+              <div className="font-bold text-slate-900 uppercase tracking-wider">Service Benchmarks</div>
+              <div><strong>Lead Time:</strong> {service.leadTimeWeeks || '2-4 weeks'}</div>
+              <div><strong>Warranty:</strong> {service.warrantyYears || '1 year comprehensive'}</div>
+              <div><strong>Engineering Base:</strong> Coimbatore Works & UAE Export Desk</div>
             </div>
           </div>
         </div>
 
-        {/* Inquiry Form */}
-        <div id="inquiry-form-section" className="scroll-mt-24">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-3 py-1 rounded-full">
-              Engineering Consultation
+        {/* Dedicated Factory Engineering Desk */}
+        <div id="factory-desk" className="scroll-mt-24 bg-gradient-to-br from-navy-950 via-slate-900 to-navy-900 text-white rounded-2xl p-8 sm:p-10 border border-slate-800 shadow-2xl">
+          <div className="max-w-3xl mx-auto text-center space-y-3 mb-8">
+            <span className="text-xs font-black uppercase tracking-wider text-brand-orange bg-brand-orange/15 px-3 py-1 rounded-full border border-brand-orange/30">
+              Factory Engineering Desk
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-              Inquire About {service.title}
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Consult on {service.title}
             </h2>
-            <p className="text-slate-600 text-sm mt-1">
-              Direct factory engineering support and rapid component dispatch from Coimbatore.
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Speak directly with our Coimbatore manufacturing engineers for custom design, turn-key line integrations, plant layout assessments, and genuine spare parts.
             </p>
           </div>
 
-          <InquiryForm
-            initialInquiryType={service.slug.includes('spare-parts') ? 'spare_parts' : 'plant_turnkey'}
-            initialProductName={service.title}
-            initialPart={service.slug.includes('spare-parts') ? 'Replacement Knife Parts (EN41 Alloy Steel)' : ''}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Phone Call */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col justify-between space-y-4 hover:border-brand-orange/50 transition-colors">
+              <div>
+                <div className="w-12 h-12 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-3 text-brand-orange">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">Direct Factory Hotline</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
+                <div className="text-xs text-slate-400 mt-1">Mon-Sat, 9:00 AM – 7:00 PM IST</div>
+              </div>
+              <a
+                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
+              >
+                Call Engineer
+              </a>
+            </div>
+
+            {/* WhatsApp */}
+            <div className="bg-white/5 border border-emerald-500/30 rounded-xl p-6 text-center flex flex-col justify-between space-y-4 hover:border-emerald-500/60 transition-colors">
+              <div>
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-400">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">Instant WhatsApp Desk</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-xs text-emerald-400 mt-1">Fast Response & Drawings</div>
+              </div>
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors shadow-lg shadow-emerald-900/30"
+              >
+                Chat on WhatsApp
+              </a>
+            </div>
+
+            {/* Sales Email */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col justify-between space-y-4 hover:border-brand-orange/50 transition-colors">
+              <div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-400">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">Engineering Inquiry Email</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-xs text-slate-400 mt-1">Formal Proforma & Scope</div>
+              </div>
+              <a
+                href={mailtoUrl}
+                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
+              >
+                Email Service Request
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-400 flex flex-wrap items-center justify-center gap-4">
+            <span className="flex items-center">
+              <MapPin className="w-3.5 h-3.5 text-brand-orange mr-1" />
+              Works: Coimbatore, Tamil Nadu, India
+            </span>
+            <span className="hidden sm:inline text-slate-600">•</span>
+            <span>Global Technical Commissioning & Support</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

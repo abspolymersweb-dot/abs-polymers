@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, Filter, ArrowRight, CheckCircle2, Sparkles, Package } from 'lucide-react';
@@ -8,19 +8,39 @@ import { GRANULE_PRODUCTS, GRANULE_CATEGORIES } from '@/data/granules';
 import { COMPANY_INFO } from '@/data/company';
 
 export default function GranulesPage() {
+  const [granulesList, setGranulesList] = useState<any[]>(GRANULE_PRODUCTS);
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = GRANULE_PRODUCTS.filter((prod) => {
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/granules')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.granules)) {
+          const publishedOnly = data.granules.filter((g: any) => g.published !== false);
+          if (publishedOnly.length > 0) {
+            setGranulesList(publishedOnly);
+          }
+        }
+      })
+      .catch((err) => console.warn('Failed to load dynamic granules:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filtered = granulesList.filter((prod) => {
     const q = searchQuery.toLowerCase().trim();
     const matchSearch =
       !q ||
       prod.name.toLowerCase().includes(q) ||
-      prod.materialType.toLowerCase().includes(q) ||
-      prod.grade.toLowerCase().includes(q) ||
-      prod.applications.some((a) => a.toLowerCase().includes(q));
+      (prod.materialType || '').toLowerCase().includes(q) ||
+      (prod.grade || '').toLowerCase().includes(q) ||
+      (prod.applications || []).some((a: string) => a.toLowerCase().includes(q));
 
-    const matchMat = selectedMaterial === 'all' || prod.materialType.toUpperCase() === selectedMaterial.toUpperCase();
+    const matchMat = selectedMaterial === 'all' || (prod.materialType || '').toUpperCase() === selectedMaterial.toUpperCase();
 
     return matchSearch && matchMat;
   });
@@ -71,7 +91,7 @@ export default function GranulesPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              All Polymers ({GRANULE_PRODUCTS.length})
+              All Polymers ({granulesList.length})
             </button>
             {GRANULE_CATEGORIES.map((cat) => (
               <button
@@ -116,7 +136,7 @@ export default function GranulesPage() {
 
                 <div className="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
                   <div><strong>Appearance:</strong> {prod.appearance}</div>
-                  <div><strong>Colors:</strong> {prod.colorsAvailable.join(', ')}</div>
+                  <div><strong>Colors:</strong> {Array.isArray(prod.colorsAvailable) ? prod.colorsAvailable.join(', ') : (prod.colorsAvailable || 'Standard')}</div>
                   {prod.meltFlowIndex && <div><strong>MFI:</strong> {prod.meltFlowIndex}</div>}
                   <div><strong>Min Order Quantity:</strong> {prod.minOrderQuantity}</div>
                 </div>

@@ -33,10 +33,10 @@ export default function Footer() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/contact?intent=quote"
-              className="inline-flex items-center px-6 py-3.5 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-md shadow-lg transition-all transform hover:-translate-y-0.5"
+              href="/contact"
+              className="inline-flex items-center px-6 py-3.5 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-md shadow-lg transition-all transform hover:-translate-y-0.5"
             >
-              <span>Request a Quote</span>
+              <span>Contact Factory</span>
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
             <a
@@ -209,12 +209,9 @@ export default function Footer() {
           <div className="flex items-center space-x-6">
             <Link href="/about" className="hover:text-slate-300">About ABS</Link>
             <Link href="/machineries" className="hover:text-slate-300">Machinery Datasheets</Link>
-            <Link href="/blog" className="hover:text-slate-300">Knowledge Centre</Link>
-            <Link href="/contact" className="hover:text-slate-300">Inquire</Link>
-            <Link href="/admin" className="text-slate-400 hover:text-white flex items-center">
-              <Shield className="w-3 h-3 mr-1 text-emerald-400" />
-              Admin
-            </Link>
+            <Link href="/granules" className="hover:text-slate-300">Polymer Granules</Link>
+            <Link href="/services" className="hover:text-slate-300">Plant Engineering</Link>
+            <Link href="/contact" className="hover:text-slate-300">Contact Us</Link>
           </div>
         </div>
       </div>

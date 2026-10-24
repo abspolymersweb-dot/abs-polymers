@@ -112,6 +112,9 @@ export interface ServiceItem {
   processSteps: { step: number; title: string; description: string }[];
   deliverables: string[];
   image: string;
+  isActive?: boolean;
+  leadTimeWeeks?: string;
+  warrantyYears?: string;
 }
 
 export type InquiryStatus = 'new' | 'contacted' | 'quotation_sent' | 'in_progress' | 'won' | 'lost';
@@ -135,6 +138,7 @@ export interface Destination {
   ctaLink: string;
   metaTitle: string;
   metaDescription: string;
+  primaryKeyword?: string;
   imageAlt: string;
   createdAt: string;
   updatedAt: string;

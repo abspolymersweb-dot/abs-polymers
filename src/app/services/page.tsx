@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Factory, Settings, Wrench, Package, Headphones, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
-import { SERVICES_DATA } from '@/data/services';
+import { dataService } from '@/services/dataService';
 
 const iconMap: Record<string, React.ElementType> = {
   Factory,
@@ -11,7 +11,12 @@ const iconMap: Record<string, React.ElementType> = {
   Headphones
 };
 
-export default function ServicesPage() {
+export const revalidate = 60;
+
+export default async function ServicesPage() {
+  const allServices = await dataService.getServices();
+  const services = (allServices || []).filter((s: any) => s.isActive !== false);
+
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Header Banner */}
@@ -33,11 +38,11 @@ export default function ServicesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {SERVICES_DATA.map((service) => {
+          {services.map((service: any) => {
             const Icon = iconMap[service.iconName] || Factory;
             return (
               <div
-                key={service.id}
+                key={service.id || service.slug}
                 className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 p-6 sm:p-8 flex flex-col justify-between group hover:-translate-y-1"
               >
                 <div>
@@ -53,17 +58,19 @@ export default function ServicesPage() {
                     {service.shortDescription}
                   </p>
 
-                  <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Process Steps
-                    </div>
-                    {service.processSteps.slice(0, 2).map((s) => (
-                      <div key={s.step} className="flex items-start text-xs text-slate-700">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mr-2 shrink-0 mt-0.5" />
-                        <span><strong>Step {s.step}:</strong> {s.title}</span>
+                  {service.processSteps && service.processSteps.length > 0 && (
+                    <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Process Steps
                       </div>
-                    ))}
-                  </div>
+                      {service.processSteps.slice(0, 2).map((s: any, idx: number) => (
+                        <div key={s.step || idx} className="flex items-start text-xs text-slate-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mr-2 shrink-0 mt-0.5" />
+                          <span><strong>Step {s.step || idx + 1}:</strong> {s.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -90,4 +97,3 @@ export default function ServicesPage() {
     </div>
   );
 }
-

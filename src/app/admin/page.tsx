@@ -3,73 +3,76 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Inbox,
-  FileText,
   Layers,
   Sparkles,
+  Wrench,
+  Globe,
   Activity,
   ArrowRight,
-  Clock,
   CheckCircle2,
   Database,
   Image as ImageIcon,
-  User,
   ExternalLink,
-  ChevronRight,
-  ShieldCheck
+  Search,
+  ShieldCheck,
+  Settings
 } from 'lucide-react';
-import { CustomerInquiry } from '@/types';
 
 export default function AdminOverviewPage() {
-  const [inquiries, setInquiries] = useState<CustomerInquiry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [productsCount, setProductsCount] = useState(6);
-  const [mediaCount, setMediaCount] = useState(6);
-  const [blogsCount, setBlogsCount] = useState(3);
+  const [productsCount, setProductsCount] = useState(0);
+  const [granulesCount, setGranulesCount] = useState(0);
+  const [servicesCount, setServicesCount] = useState(0);
+  const [destinationsCount, setDestinationsCount] = useState(0);
+  const [mediaCount, setMediaCount] = useState(0);
+  const [dbProvider, setDbProvider] = useState('Checking database...');
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/inquiries').then((r) => r.json()),
       fetch('/api/products').then((r) => r.json()),
+      fetch('/api/granules').then((r) => r.json()),
+      fetch('/api/services').then((r) => r.json()),
+      fetch('/api/destinations').then((r) => r.json()),
       fetch('/api/media').then((r) => r.json()),
-      fetch('/api/blogs').then((r) => r.json())
+      fetch('/api/db-health').then((r) => r.json())
     ])
-      .then(([inqData, prodData, mediaData, blogData]) => {
-        if (inqData.success) setInquiries(inqData.inquiries || []);
-        if (prodData.success) setProductsCount(prodData.count || 6);
-        if (mediaData.success) setMediaCount(mediaData.count || 6);
-        if (blogData.success) setBlogsCount(blogData.count || 3);
+      .then(([prodData, granData, srvData, destData, mediaData, healthData]) => {
+        if (prodData.success) setProductsCount(prodData.count || 0);
+        if (granData.success) setGranulesCount(granData.count || 0);
+        if (srvData.success) setServicesCount(srvData.count || 0);
+        if (destData.success) setDestinationsCount(destData.count || 0);
+        if (mediaData.success) setMediaCount(mediaData.count || 0);
+        if (healthData.success && healthData.health) {
+          setDbProvider(healthData.health.provider);
+        }
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
-  const newInquiries = inquiries.filter((i) => i.status === 'new');
-  const inProgress = inquiries.filter((i) => i.status === 'in_progress' || i.status === 'quotation_sent');
-
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Top Banner Notice: SQLite Live Persistent Mode */}
+      {/* Top Banner Notice: Cloud Database Status */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-emerald-900 shadow-xs">
         <div className="flex items-start">
           <Database className="w-5 h-5 text-emerald-600 mr-3 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <div className="font-bold text-sm text-emerald-950 flex items-center gap-2">
-              <span>Local CMS Active & Persistent</span>
-              <span className="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-mono uppercase">
-                SQLite WAL Mode
+              <span>Production Database Active</span>
+              <span className="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-mono uppercase font-bold">
+                {dbProvider}
               </span>
             </div>
             <p className="text-emerald-800">
-              Database stored at <code className="font-mono bg-emerald-100/80 px-1.5 py-0.5 rounded">data/abs_polymers.db</code>. Images saved in <code className="font-mono bg-emerald-100/80 px-1.5 py-0.5 rounded">public/uploads/</code>. All page edits, images, specs, and quotation inquiries are permanently preserved across server restarts.
+              Machinery specifications, polymer granule grades, turnkey services, and international export corridors persist across deployments with full RLS data protection.
             </p>
           </div>
         </div>
         <Link
           href="/admin/db-health"
-          className="inline-flex items-center font-bold px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shrink-0 shadow-2xs"
+          className="inline-flex items-center font-bold px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shrink-0 shadow-xs"
         >
-          Database Health →
+          Inspect DB Health →
         </Link>
       </div>
 
@@ -80,213 +83,187 @@ export default function AdminOverviewPage() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Total Inquiries */}
+          {/* Machinery Products */}
           <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Inquiries</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Machinery Catalogue</span>
               <div className="w-8 h-8 rounded-lg bg-orange-50 text-brand-orange flex items-center justify-center">
-                <Inbox className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-black text-slate-900">
-              {loading ? '...' : inquiries.length}
-            </div>
-            <div className="text-xs text-brand-orange font-semibold flex items-center">
-              <span>{newInquiries.length} New awaiting review</span>
-            </div>
-          </div>
-
-          {/* Active Machinery */}
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Active Machinery</span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <Layers className="w-4 h-4" />
               </div>
             </div>
             <div className="text-3xl font-black text-slate-900">
-              {productsCount} Lines
-            </div>
-            <div className="text-xs text-slate-500">
-              Havells 3-Phase Motors Verified
-            </div>
-          </div>
-
-          {/* Media Assets */}
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Media Assets</span>
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                <ImageIcon className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-black text-slate-900">
-              {mediaCount} Files
-            </div>
-            <div className="text-xs text-slate-500">
-              Local persistent disk storage
-            </div>
-          </div>
-
-          {/* Published Blogs / SEO Readiness */}
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Published Blogs</span>
-              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                <FileText className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-black text-slate-900">
-              {blogsCount}
+              {loading ? '...' : productsCount}
             </div>
             <div className="text-xs text-emerald-600 font-semibold flex items-center">
-              <span>Avg. SEO Readiness: 91/100</span>
+              <span>Washing Plants, Crushers, Conveyors, Blowers</span>
+            </div>
+          </div>
+
+          {/* Granules Catalog */}
+          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
+            <div className="flex items-center justify-between text-slate-500">
+              <span className="text-xs font-bold uppercase tracking-wider">Granules & Polymers</span>
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-navy-950 flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-slate-900">
+              {loading ? '...' : granulesCount}
+            </div>
+            <div className="text-xs text-slate-500">
+              <span>HDPE, PP, LDPE, ABS Reprocessed</span>
+            </div>
+          </div>
+
+          {/* Services */}
+          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
+            <div className="flex items-center justify-between text-slate-500">
+              <span className="text-xs font-bold uppercase tracking-wider">Industrial Services</span>
+              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+                <Wrench className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-slate-900">
+              {loading ? '...' : servicesCount}
+            </div>
+            <div className="text-xs text-slate-500">
+              <span>Turnkey lines, AMC, custom design</span>
+            </div>
+          </div>
+
+          {/* Export Destinations */}
+          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-2">
+            <div className="flex items-center justify-between text-slate-500">
+              <span className="text-xs font-bold uppercase tracking-wider">Export Corridors</span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Globe className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-slate-900">
+              {loading ? '...' : destinationsCount}
+            </div>
+            <div className="text-xs text-slate-500">
+              <span>UAE, Kenya, Nigeria, Mexico, Tanzania...</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Recent Inquiries Queue */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Recent Customer Inquiries</h2>
-              <p className="text-xs text-slate-500">Live incoming machinery and granules quotations</p>
-            </div>
-            <Link
-              href="/admin/inquiries"
-              className="text-xs font-bold text-brand-orange hover:underline flex items-center"
-            >
-              View Full Pipeline ({inquiries.length})
-              <ChevronRight className="w-4 h-4 ml-0.5" />
-            </Link>
+      {/* Quick Launch Control Centers */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link
+          href="/admin/machineries"
+          className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-brand-orange hover:shadow-md transition-all space-y-3 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center group-hover:bg-brand-orange group-hover:text-white transition-colors">
+            <Layers className="w-5 h-5" />
           </div>
-
-          <div className="divide-y divide-slate-100">
-            {loading ? (
-              <div className="p-8 text-center text-xs text-slate-400">Loading inquiries from SQLite...</div>
-            ) : inquiries.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400">No inquiries recorded yet.</div>
-            ) : (
-              inquiries.slice(0, 5).map((inq) => (
-                <div key={inq.id} className="p-4 sm:p-5 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-bold text-slate-900 text-sm">{inq.fullName}</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs text-slate-500 font-medium">{inq.companyName || 'Private Recycler'}</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs text-slate-400 font-mono">{inq.country}</span>
-                    </div>
-                    <div className="text-xs text-slate-600">
-                      Product: <strong className="text-slate-900">{inq.productName || inq.inquiryType}</strong>
-                      {inq.estimatedCapacityNeeded && (
-                        <span className="text-slate-400 ml-1">({inq.estimatedCapacityNeeded})</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        inq.status === 'new'
-                          ? 'bg-amber-100 text-amber-800'
-                          : inq.status === 'quotation_sent'
-                          ? 'bg-blue-100 text-[#04294a]'
-                          : 'bg-emerald-100 text-emerald-800'
-                      }`}
-                    >
-                      {inq.status.replace('_', ' ')}
-                    </span>
-                    <Link
-                      href={`/admin/inquiries?id=${inq.id}`}
-                      className="p-1 text-slate-400 hover:text-brand-orange"
-                      title="Open inquiry"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))
-            )}
+          <h2 className="text-base font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
+            Machinery Management
+          </h2>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Add new recycling machines, update Havells motor kW and rotor knife specs, replace hero photos, and toggle publishing.
+          </p>
+          <div className="text-xs font-bold text-brand-orange inline-flex items-center pt-1">
+            <span>Manage Machines</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </div>
+        </Link>
+
+        <Link
+          href="/admin/granules"
+          className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-brand-orange hover:shadow-md transition-all space-y-3 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-navy-950 flex items-center justify-center group-hover:bg-navy-950 group-hover:text-white transition-colors">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <h2 className="text-base font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
+            Granules Management
+          </h2>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Manage reprocessed polymer grades, melt flow index (MFI), colors, minimum order quantities, and packaging specifications.
+          </p>
+          <div className="text-xs font-bold text-brand-orange inline-flex items-center pt-1">
+            <span>Manage Granules</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/services"
+          className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-brand-orange hover:shadow-md transition-all space-y-3 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center group-hover:bg-purple-700 group-hover:text-white transition-colors">
+            <Wrench className="w-5 h-5" />
+          </div>
+          <h2 className="text-base font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
+            Turnkey Services
+          </h2>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Configure recycling plant engineering scopes, installation deliverables, and genuine spare parts delivery pipelines.
+          </p>
+          <div className="text-xs font-bold text-brand-orange inline-flex items-center pt-1">
+            <span>Manage Services</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          </div>
+        </Link>
+      </div>
+
+      {/* Operational Highlights */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Platform Health & Quick Links</h2>
+            <p className="text-xs text-slate-500">Real-time status of production subsystems</p>
+          </div>
+          <a
+            href="/"
+            target="_blank"
+            className="text-xs font-bold text-brand-orange hover:underline inline-flex items-center"
+          >
+            <span>Open Public Website</span>
+            <ExternalLink className="w-3.5 h-3.5 ml-1" />
+          </a>
         </div>
 
-        {/* Quick Management Shortcuts */}
-        <div className="lg:col-span-4 space-y-5">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
-              Quick CMS Workflows
-            </h3>
-            <div className="space-y-2">
-              <Link
-                href="/admin/pages"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-orange-50/60 hover:border-brand-orange/40 border border-transparent transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-brand-orange">
-                    Edit Pages & Copy
-                  </div>
-                  <div className="text-[11px] text-slate-500">Hero headlines, feature bar, compact plant</div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange" />
-              </Link>
-
-              <Link
-                href="/admin/media"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-orange-50/60 hover:border-brand-orange/40 border border-transparent transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-brand-orange">
-                    Media Library & Images
-                  </div>
-                  <div className="text-[11px] text-slate-500">Upload photos, copy image URLs, view gallery</div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange" />
-              </Link>
-
-              <Link
-                href="/admin/machineries"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-orange-50/60 hover:border-brand-orange/40 border border-transparent transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-brand-orange">
-                    Machinery Datasheets
-                  </div>
-                  <div className="text-[11px] text-slate-500">Edit model variants, electricals, capacity</div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange" />
-              </Link>
-
-              <Link
-                href="/admin/settings"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-orange-50/60 hover:border-brand-orange/40 border border-transparent transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-brand-orange">
-                    Company & Admin Security
-                  </div>
-                  <div className="text-[11px] text-slate-500">Contact details, passwords, footer attribution</div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange" />
-              </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <div className="font-bold text-slate-900 flex items-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 mr-1.5" />
+              Dynamic XML Sitemap
+            </div>
+            <p className="text-slate-500">Automatically reflects newly published machinery, granules, and services.</p>
+            <div className="pt-1">
+              <a href="/sitemap.xml" target="_blank" className="font-bold text-brand-orange hover:underline">
+                /sitemap.xml →
+              </a>
             </div>
           </div>
 
-          {/* System Environment Quick Badge */}
-          <div className="bg-navy-950 text-slate-300 rounded-2xl p-5 border border-slate-800 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-white font-bold">
-              <span className="flex items-center">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 mr-1.5" />
-                Persistent Local CMS
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">localhost:3000</span>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <div className="font-bold text-slate-900 flex items-center">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 mr-1.5" />
+              Crawler Exclusion Directives
             </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Full administrative autonomy without manual code changes. Changes to copy, specifications, and media persist in SQLite.
-            </p>
+            <p className="text-slate-500">Admin screens and private APIs are disallowed from public search indexation.</p>
+            <div className="pt-1">
+              <a href="/robots.txt" target="_blank" className="font-bold text-brand-orange hover:underline">
+                /robots.txt →
+              </a>
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <div className="font-bold text-slate-900 flex items-center">
+              <Search className="w-4 h-4 text-emerald-600 mr-1.5" />
+              Technical SEO Engine
+            </div>
+            <p className="text-slate-500">Real-time canonical tags, structured data, and metadata audits.</p>
+            <div className="pt-1">
+              <Link href="/admin/seo" className="font-bold text-brand-orange hover:underline">
+                Launch SEO Engine →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

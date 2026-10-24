@@ -56,3 +56,26 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Service ID or slug is required' }, { status: 400 });
+    }
+
+    await dataService.deleteService(id);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Service deleted successfully'
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to delete service' },
+      { status: 500 }
+    );
+  }
+}

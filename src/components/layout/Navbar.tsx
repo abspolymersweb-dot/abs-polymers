@@ -29,6 +29,7 @@ interface NavItem {
   dropdown?: DropdownItem[];
 }
 
+// Blog / Insights removed in production
 const NAV_LINKS: NavItem[] = [
   { name: 'Home', href: '/' },
   { name: 'About Us', href: '/about' },
@@ -45,7 +46,6 @@ const NAV_LINKS: NavItem[] = [
   },
   { name: 'Granules', href: '/granules' },
   { name: 'Solutions', href: '/services' },
-  { name: 'Insights', href: '/blog' },
   { name: 'Contact', href: '/contact' },
 ];
 
@@ -78,9 +78,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  /* Scroll listener — transparent to solid on home; always solid on inner pages */
+  /* Scroll listener — lightweight threshold for smooth transition */
   const handleScroll = useCallback(() => {
-    setScrolled(window.scrollY > 30);
+    // When past hero (60px threshold)
+    setScrolled(window.scrollY > 60);
   }, []);
 
   useEffect(() => {
@@ -101,15 +102,13 @@ export default function Navbar() {
   const isActive = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(href));
 
-  // Consistent Navy navbar across the entire website eliminates contrast bugs
-  const navBackground = isHome
-    ? scrolled
-      ? 'bg-navy-950/95 backdrop-blur-md shadow-lg border-b border-slate-800/90'
-      : 'bg-navy-950/60 backdrop-blur-xs border-b border-white/10'
-    : 'bg-navy-950/98 backdrop-blur-md shadow-md border-b border-slate-800/90';
+  // Opaque solid background when scrolled or on inner pages; glass-overlay only over hero at scroll 0
+  const headerStyle = isHome && !scrolled
+    ? 'bg-navy-950/50 backdrop-blur-md border-b border-white/10 shadow-none'
+    : 'bg-navy-950 shadow-2xl border-b border-slate-800/90';
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${navBackground}`}>
+    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 motion-reduce:transition-none ${headerStyle}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* ── Brand Logo — Approved Pure White on Dark Navy ── */}
@@ -165,13 +164,13 @@ export default function Navbar() {
                           initial="hidden"
                           animate="visible"
                           exit="exit"
-                          className="absolute top-full left-0 w-84 bg-navy-900/98 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/80 py-2 mt-2 z-50 overflow-hidden"
+                          className="absolute top-full left-0 w-84 bg-navy-950 rounded-xl shadow-2xl border border-slate-700/80 py-2 mt-2 z-50 overflow-hidden"
                         >
                           {link.dropdown.map((item) => (
                             <Link
                               key={item.name}
                               href={item.href}
-                              className="block px-4 py-3 hover:bg-navy-800/90 transition-colors group/item border-b border-slate-800/60 last:border-b-0"
+                              className="block px-4 py-3 hover:bg-navy-900 transition-colors group/item border-b border-slate-800/60 last:border-b-0"
                               onClick={() => setDropdownOpen(false)}
                             >
                               <div className="text-sm font-bold text-slate-100 group-hover/item:text-brand-orange transition-colors">
@@ -208,24 +207,24 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* ── Right Action CTA ── */}
+          {/* ── Right Action CTA — Direct Factory Contact ── */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
-              href="/contact?intent=quote"
+              href="/contact"
               className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow-md hover:shadow-orange-500/25 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
             >
-              Request a Quote
+              <span>Contact Factory</span>
               <ArrowRight className="ml-1.5 w-4 h-4" />
             </Link>
           </div>
 
-          {/* ── Mobile Controls (Hamburger & Quick CTA) ── */}
+          {/* ── Mobile Controls (Hamburger & Direct Contact) ── */}
           <div className="flex lg:hidden items-center gap-2.5">
             <Link
-              href="/contact?intent=quote"
+              href="/contact"
               className="px-3 py-1.5 text-xs font-bold text-white bg-brand-orange rounded-md shadow-xs active:bg-orange-600"
             >
-              Quote
+              Contact
             </Link>
             <button
               onClick={() => setMobileOpen(true)}
@@ -249,101 +248,105 @@ export default function Navbar() {
               animate="visible"
               exit="exit"
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-navy-950/70 backdrop-blur-sm z-40"
-              aria-hidden="true"
+              className="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 lg:hidden"
             />
 
-            <motion.div
+            <motion.aside
               key="panel"
               variants={mobilePanel}
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-y-0 right-0 w-full max-w-sm bg-navy-950 border-l border-slate-800 z-50 flex flex-col shadow-2xl"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mobile Navigation Drawer"
+              className="fixed inset-y-0 right-0 w-full max-w-sm bg-navy-950 border-l border-slate-800 z-50 flex flex-col justify-between overflow-y-auto lg:hidden"
             >
-              {/* Header inside mobile drawer */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-navy-900/60">
-                <Link href="/" onClick={() => setMobileOpen(false)} className="relative h-10 w-40">
-                  <Image
-                    src="/images/logo.png"
-                    alt="ABS Polymers"
-                    fill
-                    className="object-contain object-left brightness-0 invert"
-                  />
-                </Link>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-900 transition-colors"
-                  aria-label="Close menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Navigation items in drawer */}
-              <div className="flex-1 overflow-y-auto px-5 py-5 space-y-1">
-                {NAV_LINKS.map((link) => (
-                  <div key={link.name} className="py-0.5">
-                    <Link
-                      href={link.href}
-                      className={`block px-3.5 py-3 text-base font-semibold rounded-lg transition-colors min-h-[44px] flex items-center ${
-                        isActive(link.href)
-                          ? 'text-brand-orange bg-brand-orange/15 font-bold'
-                          : 'text-slate-200 hover:bg-navy-900 hover:text-white'
-                      }`}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                    {link.dropdown && (
-                      <div className="pl-4 space-y-1 my-1 border-l border-slate-800 ml-4">
-                        {link.dropdown.map((sub) => (
-                          <Link
-                            key={sub.name}
-                            href={sub.href}
-                            className="block py-2.5 px-3 text-sm text-slate-400 hover:text-brand-orange transition-colors rounded-lg min-h-[40px] flex items-center"
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
+              <div>
+                {/* Mobile Drawer Header */}
+                <div className="flex items-center justify-between p-5 border-b border-slate-800">
+                  <div className="relative h-9 w-36">
+                    <Image
+                      src="/images/logo.png"
+                      alt="ABS Polymers"
+                      fill
+                      className="object-contain object-left brightness-0 invert"
+                    />
                   </div>
-                ))}
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-navy-900 rounded-lg transition-colors"
+                    aria-label="Close navigation menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Mobile Navigation List */}
+                <nav className="p-4 space-y-1">
+                  {NAV_LINKS.map((link) => (
+                    <div key={link.name}>
+                      <Link
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+                          isActive(link.href)
+                            ? 'bg-navy-900 text-brand-orange'
+                            : 'text-slate-200 hover:bg-navy-900/60 hover:text-white'
+                        }`}
+                      >
+                        <span>{link.name}</span>
+                        {isActive(link.href) && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
+                        )}
+                      </Link>
+
+                      {/* Sub-items for Machineries on mobile */}
+                      {link.dropdown && (
+                        <div className="pl-4 pr-2 py-1 space-y-1">
+                          {link.dropdown.map((sub) => (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              onClick={() => setMobileOpen(false)}
+                              className="block px-3 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg hover:bg-navy-900/40"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </nav>
               </div>
 
-              {/* Bottom Actions in Drawer */}
-              <div className="border-t border-slate-800 px-5 py-5 space-y-3.5 bg-navy-900/80">
+              {/* Mobile Drawer Footer with Contact Information */}
+              <div className="p-5 border-t border-slate-800 space-y-4">
                 <Link
-                  href="/contact?intent=quote"
-                  className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow-md transition-colors min-h-[44px]"
+                  href="/contact"
                   onClick={() => setMobileOpen(false)}
+                  className="w-full flex items-center justify-center py-3 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-xl shadow-md transition-colors"
                 >
-                  Request a Quote
+                  <span>Contact Sales Desk</span>
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
-                <div className="flex items-center justify-between text-xs pt-1">
+
+                <div className="pt-2 border-t border-slate-800/80 space-y-2 text-xs text-slate-400">
                   <a
                     href={`tel:${COMPANY_INFO.contact.phone}`}
-                    className="flex items-center font-medium text-slate-300 hover:text-white"
+                    className="flex items-center text-slate-300 hover:text-brand-orange transition-colors"
                   >
-                    <Phone className="w-3.5 h-3.5 mr-1.5 text-brand-orange" />
-                    {COMPANY_INFO.contact.phoneDisplay}
+                    <Phone className="w-4 h-4 mr-2 text-brand-orange shrink-0" />
+                    <span>{COMPANY_INFO.contact.phoneDisplay}</span>
                   </a>
                   <a
-                    href={`mailto:${COMPANY_INFO.contact.email}`}
-                    className="flex items-center font-medium text-slate-300 hover:text-white"
+                    href={`mailto:${COMPANY_INFO.contact.salesEmail}`}
+                    className="flex items-center text-slate-300 hover:text-brand-orange transition-colors"
                   >
-                    <Mail className="w-3.5 h-3.5 mr-1.5 text-brand-orange" />
-                    Email Us
+                    <Mail className="w-4 h-4 mr-2 text-brand-orange shrink-0" />
+                    <span>{COMPANY_INFO.contact.salesEmail}</span>
                   </a>
                 </div>
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
