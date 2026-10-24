@@ -22,6 +22,7 @@ import {
   getAllDbSettings,
   setDbSetting,
   getAllDbPages,
+  getDbPage,
   saveDbPage
 } from '@/lib/db';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
@@ -108,9 +109,14 @@ export const dataService = {
           updated_at: new Date().toISOString()
         };
         const { error } = await client.from('products').upsert(payload);
-        if (!error) savedInSupabase = true;
-      } catch (err) {
-        console.warn('Supabase product save fallback to SQLite:', err);
+        if (error) {
+          console.error('Supabase product upsert error:', error);
+          throw new Error(error.message);
+        }
+        savedInSupabase = true;
+      } catch (err: any) {
+        console.error('Supabase product save error:', err);
+        throw err;
       }
     }
 
@@ -126,9 +132,11 @@ export const dataService = {
     if (isSupabaseConfigured()) {
       try {
         const client = getSupabaseAdmin();
-        await client.from('products').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
-      } catch (err) {
-        console.warn('Supabase delete product error:', err);
+        const { error } = await client.from('products').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+        if (error) throw new Error(error.message);
+      } catch (err: any) {
+        console.error('Supabase delete product error:', err);
+        throw err;
       }
     }
     try {
@@ -145,15 +153,15 @@ export const dataService = {
       id: r.id,
       slug: r.slug,
       name: r.name,
-      series: r.series || fallback?.series || '',
-      category: r.category || fallback?.category || 'crushers',
-      shortDescription: r.short_description || fallback?.shortDescription || '',
-      overview: r.overview || fallback?.overview || '',
+      series: r.series !== undefined && r.series !== null ? r.series : (fallback?.series || ''),
+      category: r.category !== undefined && r.category !== null ? r.category : (fallback?.category || 'crushers'),
+      shortDescription: r.short_description !== undefined && r.short_description !== null ? r.short_description : (fallback?.shortDescription || ''),
+      overview: r.overview !== undefined && r.overview !== null ? r.overview : (fallback?.overview || ''),
       featured: Boolean(r.featured),
-      highlightBadge: r.highlight_badge || fallback?.highlightBadge || '',
+      highlightBadge: r.highlight_badge !== undefined && r.highlight_badge !== null ? r.highlight_badge : (fallback?.highlightBadge || ''),
       heroImage: r.hero_image || fallback?.heroImage || '/images/products/washing-plant-line.png',
       galleryImages: parseJsonField<string[]>(r.gallery_images_json, fallback?.galleryImages || []),
-      brochureUrl: r.brochure_url || fallback?.brochureUrl || '',
+      brochureUrl: r.brochure_url !== undefined && r.brochure_url !== null ? r.brochure_url : (fallback?.brochureUrl || ''),
       compatibleMaterials: parseJsonField<string[]>(r.compatible_materials_json, fallback?.compatibleMaterials || []),
       keyBenefits: parseJsonField<string[]>(r.key_benefits_json, fallback?.keyBenefits || []),
       applications: parseJsonField<string[]>(r.applications_json, fallback?.applications || []),
@@ -161,8 +169,8 @@ export const dataService = {
       variants: parseJsonField<any[]>(r.variants_json, fallback?.variants || []),
       verifiedSpecs: parseJsonField<any[]>(r.verified_specs_json, fallback?.verifiedSpecs || []),
       awaitingConfirmationSpecs: parseJsonField<any[]>(r.awaiting_confirmation_specs_json, fallback?.awaitingConfirmationSpecs || []),
-      metaTitle: r.meta_title || fallback?.metaTitle || `${r.name} | ABS Polymers Coimbatore`,
-      metaDescription: r.meta_description || fallback?.metaDescription || r.short_description || '',
+      metaTitle: r.meta_title || `${r.name} | ABS Polymers Coimbatore`,
+      metaDescription: r.meta_description || r.short_description || '',
       published: r.published !== false && r.published !== 0
     };
   },
@@ -233,9 +241,14 @@ export const dataService = {
           updated_at: new Date().toISOString()
         };
         const { error } = await client.from('granules').upsert(payload);
-        if (!error) savedInSupabase = true;
-      } catch (err) {
-        console.warn('Supabase granule save fallback to SQLite:', err);
+        if (error) {
+          console.error('Supabase granule upsert error:', error);
+          throw new Error(error.message);
+        }
+        savedInSupabase = true;
+      } catch (err: any) {
+        console.error('Supabase granule save error:', err);
+        throw err;
       }
     }
 
@@ -251,9 +264,11 @@ export const dataService = {
     if (isSupabaseConfigured()) {
       try {
         const client = getSupabaseAdmin();
-        await client.from('granules').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
-      } catch (err) {
-        console.warn('Supabase delete granule error:', err);
+        const { error } = await client.from('granules').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+        if (error) throw new Error(error.message);
+      } catch (err: any) {
+        console.error('Supabase delete granule error:', err);
+        throw err;
       }
     }
     try {
@@ -344,9 +359,14 @@ export const dataService = {
           updated_at: new Date().toISOString()
         };
         const { error } = await client.from('services').upsert(payload);
-        if (!error) savedInSupabase = true;
-      } catch (err) {
-        console.warn('Supabase service save fallback to SQLite:', err);
+        if (error) {
+          console.error('Supabase service upsert error:', error);
+          throw new Error(error.message);
+        }
+        savedInSupabase = true;
+      } catch (err: any) {
+        console.error('Supabase service save error:', err);
+        throw err;
       }
     }
 
@@ -362,9 +382,11 @@ export const dataService = {
     if (isSupabaseConfigured()) {
       try {
         const client = getSupabaseAdmin();
-        await client.from('services').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
-      } catch (err) {
-        console.warn('Supabase delete service error:', err);
+        const { error } = await client.from('services').delete().or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+        if (error) throw new Error(error.message);
+      } catch (err: any) {
+        console.error('Supabase delete service error:', err);
+        throw err;
       }
     }
     try {
@@ -455,9 +477,14 @@ export const dataService = {
           updated_at: new Date().toISOString()
         };
         const { error } = await client.from('destinations').upsert(payload);
-        if (!error) savedInSupabase = true;
-      } catch (err) {
-        console.warn('Supabase destination save fallback to SQLite:', err);
+        if (error) {
+          console.error('Supabase destination upsert error:', error);
+          throw new Error(error.message);
+        }
+        savedInSupabase = true;
+      } catch (err: any) {
+        console.error('Supabase destination save error:', err);
+        throw err;
       }
     }
 
@@ -473,12 +500,14 @@ export const dataService = {
     if (isSupabaseConfigured()) {
       try {
         const client = getSupabaseAdmin();
-        await client
+        const { error } = await client
           .from('destinations')
           .delete()
           .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
-      } catch (err) {
-        console.warn('Supabase delete destination error:', err);
+        if (error) throw new Error(error.message);
+      } catch (err: any) {
+        console.error('Supabase delete destination error:', err);
+        throw err;
       }
     }
     try {
@@ -669,6 +698,98 @@ export const dataService = {
       for (const [k, v] of Object.entries(settings)) {
         setDbSetting(k, String(v));
       }
+    } catch (e) {
+      // Ignored
+    }
+    return true;
+  },
+
+  // --------------------------------------------------------------------------
+  // PAGES & CMS STORE
+  // --------------------------------------------------------------------------
+  async getPages(): Promise<Record<string, any>> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        const { data, error } = await client.from('pages').select('*');
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const dict: Record<string, any> = {};
+          data.forEach((r) => {
+            dict[r.slug] = {
+              title: r.title,
+              seo: {
+                metaTitle: r.meta_title || '',
+                metaDescription: r.meta_description || '',
+                ogImage: r.og_image || ''
+              },
+              sections: parseJsonField<any>(r.sections_json, {})
+            };
+          });
+          return dict;
+        }
+      } catch (err) {
+        console.warn('Supabase pages query fallback to SQLite:', err);
+      }
+    }
+
+    return getAllDbPages();
+  },
+
+  async getPage(slug: string): Promise<any | null> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        const { data, error } = await client
+          .from('pages')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+
+        if (!error && data) {
+          return {
+            title: data.title,
+            seo: {
+              metaTitle: data.meta_title || '',
+              metaDescription: data.meta_description || '',
+              ogImage: data.og_image || ''
+            },
+            sections: parseJsonField<any>(data.sections_json, {})
+          };
+        }
+      } catch (err) {
+        console.warn('Supabase page query fallback to SQLite:', err);
+      }
+    }
+
+    return getDbPage(slug);
+  },
+
+  async savePage(slug: string, pageData: any): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseAdmin();
+        const payload = {
+          slug,
+          title: pageData.title || slug.toUpperCase(),
+          meta_title: pageData.seo?.metaTitle || '',
+          meta_description: pageData.seo?.metaDescription || '',
+          og_image: pageData.seo?.ogImage || '',
+          sections_json: pageData.sections || {},
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await client.from('pages').upsert(payload);
+        if (error) {
+          console.error('Supabase page upsert error:', error);
+          throw new Error(error.message);
+        }
+      } catch (err: any) {
+        console.error('Supabase page save error:', err);
+        throw err;
+      }
+    }
+
+    try {
+      saveDbPage(slug, pageData);
     } catch (e) {
       // Ignored
     }

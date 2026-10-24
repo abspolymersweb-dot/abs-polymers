@@ -66,8 +66,34 @@ const SERVICES: ServiceCard[] = [
   },
 ];
 
-export default function ServicesSection() {
+const iconLookup: Record<string, React.ComponentType<{ className?: string }>> = {
+  Factory,
+  Wrench,
+  Settings,
+  ShieldCheck,
+  Headphones,
+  Layers
+};
+
+export default function ServicesSection({ initialServices }: { initialServices?: any[] }) {
   const shouldReduceMotion = useReducedMotion();
+
+  const displayServices = React.useMemo(() => {
+    if (initialServices && Array.isArray(initialServices) && initialServices.length > 0) {
+      const active = initialServices.filter((s: any) => s.isActive !== false);
+      if (active.length > 0) {
+        return active.slice(0, 6).map((s: any) => ({
+          id: s.id,
+          slug: s.slug,
+          title: s.title,
+          desc: s.shortDescription || s.short_desc || '',
+          tag: 'Industrial Service',
+          icon: iconLookup[s.iconName || s.icon] || Factory
+        }));
+      }
+    }
+    return SERVICES;
+  }, [initialServices]);
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
@@ -113,7 +139,7 @@ export default function ServicesSection() {
 
         {/* 6 Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {SERVICES.map((srv, idx) => {
+          {displayServices.map((srv, idx) => {
             const Icon = srv.icon;
             return (
               <motion.div

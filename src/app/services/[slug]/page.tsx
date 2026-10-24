@@ -19,6 +19,9 @@ import {
 import { dataService } from '@/services/dataService';
 import { COMPANY_INFO } from '@/data/company';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const iconMap: Record<string, React.ElementType> = {
   Factory,
   Settings,

@@ -44,7 +44,7 @@ export default function AdminGranulesPage() {
   const fetchGranules = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/granules');
+      const res = await fetch('/api/granules', { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         setGranules(data.granules || []);

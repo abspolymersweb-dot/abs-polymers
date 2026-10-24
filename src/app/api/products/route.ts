@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { dataService } from '@/services/dataService';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,13 +12,25 @@ export async function GET(request: NextRequest) {
     if (slug) {
       const product = await dataService.getProducts(slug);
       if (!product) {
-        return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
+        return NextResponse.json(
+          { success: false, error: 'Product not found' },
+          {
+            status: 404,
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          }
+        );
       }
-      return NextResponse.json({ success: true, product });
+      return NextResponse.json(
+        { success: true, product },
+        { headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } }
+      );
     }
 
     const products = await dataService.getProducts();
-    return NextResponse.json({ success: true, count: products.length, products });
+    return NextResponse.json(
+      { success: true, count: products.length, products },
+      { headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch products' },
@@ -45,14 +60,25 @@ export async function POST(request: NextRequest) {
 
     await dataService.saveProduct(body);
 
+    // Dynamic Cache Invalidation
+    try {
+      revalidatePath('/');
+      revalidatePath('/machineries');
+      revalidatePath(`/machineries/${body.slug}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revErr) {
+      console.warn('Revalidation warning:', revErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Product saved successfully to database',
       product: body
     });
   } catch (error: any) {
+    console.error('API products POST error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to save product' },
+      { success: false, error: error.message || 'Failed to save product to database' },
       { status: 500 }
     );
   }
@@ -64,16 +90,30 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Product ID or slug is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Product ID or slug is required' },
+        { status: 400 }
+      );
     }
 
     await dataService.deleteProduct(id);
+
+    // Dynamic Cache Invalidation
+    try {
+      revalidatePath('/');
+      revalidatePath('/machineries');
+      revalidatePath(`/machineries/${id}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revErr) {
+      console.warn('Revalidation warning:', revErr);
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Product deleted successfully'
     });
   } catch (error: any) {
+    console.error('API products DELETE error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete product' },
       { status: 500 }

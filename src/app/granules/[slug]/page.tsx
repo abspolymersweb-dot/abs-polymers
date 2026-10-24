@@ -16,6 +16,9 @@ import {
 import { dataService } from '@/services/dataService';
 import { COMPANY_INFO } from '@/data/company';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateStaticParams() {
   const granules = await dataService.getGranules();
   return (granules || [])

@@ -66,11 +66,11 @@ export default function AdminSeoEnginePage() {
     try {
       setLoading(true);
       const [destRes, prodRes, granRes, servRes, settingsRes] = await Promise.all([
-        fetch('/api/destinations'),
-        fetch('/api/products'),
-        fetch('/api/granules'),
-        fetch('/api/services'),
-        fetch('/api/settings')
+        fetch('/api/destinations', { cache: 'no-store' }),
+        fetch('/api/products', { cache: 'no-store' }),
+        fetch('/api/granules', { cache: 'no-store' }),
+        fetch('/api/services', { cache: 'no-store' }),
+        fetch('/api/settings', { cache: 'no-store' })
       ]);
 
       const [destData, prodData, granData, servData, settingsData] = await Promise.all([

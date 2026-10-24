@@ -29,12 +29,12 @@ export default function AdminOverviewPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/products').then((r) => r.json()),
-      fetch('/api/granules').then((r) => r.json()),
-      fetch('/api/services').then((r) => r.json()),
-      fetch('/api/destinations').then((r) => r.json()),
-      fetch('/api/media').then((r) => r.json()),
-      fetch('/api/db-health').then((r) => r.json())
+      fetch('/api/products', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/granules', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/services', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/destinations', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/media', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/db-health', { cache: 'no-store' }).then((r) => r.json())
     ])
       .then(([prodData, granData, srvData, destData, mediaData, healthData]) => {
         if (prodData.success) setProductsCount(prodData.count || 0);

@@ -39,7 +39,7 @@ export default function AdminDestinationsPage() {
   const fetchDestinations = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/destinations');
+      const res = await fetch('/api/destinations', { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         setDestinations(data.destinations || []);

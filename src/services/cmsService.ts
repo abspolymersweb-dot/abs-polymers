@@ -1,19 +1,20 @@
 import fs from 'fs';
 import path from 'path';
 import { GlobalCmsStore, CmsPageData, DEFAULT_CMS_STORE } from '@/types/cms';
-import { getDbPage, getAllDbPages, saveDbPage } from '@/lib/db';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { getAllDbPages, saveDbPage } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 
 export * from '@/types/cms';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'cms-content.json');
 
+// Synchronous getter for backward compatibility
 export function getCmsStore(): GlobalCmsStore {
   try {
     const dbPages = getAllDbPages();
     if (Object.keys(dbPages).length > 0) {
       return {
-        version: '2.1.0-sqlite',
+        version: '3.0.0',
         lastUpdated: new Date().toISOString(),
         pages: {
           ...DEFAULT_CMS_STORE.pages,
@@ -22,10 +23,9 @@ export function getCmsStore(): GlobalCmsStore {
       };
     }
   } catch (err) {
-    console.warn('SQLite read failed, attempting fallback to JSON file:', err);
+    // fallback
   }
 
-  // Fallback to JSON file if SQLite has an unexpected error
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
@@ -40,100 +40,75 @@ export function getCmsStore(): GlobalCmsStore {
       };
     }
   } catch (err) {
-    console.error('Error reading CMS store file, using defaults:', err);
+    // fallback
   }
 
   return DEFAULT_CMS_STORE;
 }
 
-export function saveCmsStore(data: Partial<GlobalCmsStore>): GlobalCmsStore {
-  const current = getCmsStore();
-  const updated: GlobalCmsStore = {
-    ...current,
-    ...data,
-    lastUpdated: new Date().toISOString(),
-    pages: {
-      ...current.pages,
-      ...(data.pages || {})
-    }
-  };
-
-  // 1. Save to SQLite Database
+// Authoritative Async getter that reads directly from production Supabase database
+export async function getCmsStoreAsync(): Promise<GlobalCmsStore> {
   try {
-    for (const [slug, pageData] of Object.entries(updated.pages)) {
-      saveDbPage(slug, pageData);
+    const dbPages = await dataService.getPages();
+    if (dbPages && Object.keys(dbPages).length > 0) {
+      return {
+        version: '3.0.0-production',
+        lastUpdated: new Date().toISOString(),
+        pages: {
+          ...DEFAULT_CMS_STORE.pages,
+          ...(dbPages as any)
+        }
+      };
     }
   } catch (err) {
-    console.error('Failed to save to SQLite database:', err);
+    console.warn('Failed to load async CMS store from Supabase, falling back:', err);
   }
 
-  // 2. Mirror to Supabase Cloud Database if configured
-  if (isSupabaseConfigured()) {
-    try {
-      const client = getSupabaseAdmin();
-      const rows = Object.entries(updated.pages).map(([slug, pageData]) => ({
-        slug,
-        title: slug.toUpperCase(),
-        meta_title: (pageData as any).seo?.metaTitle || '',
-        meta_description: (pageData as any).seo?.metaDescription || '',
-        og_image: (pageData as any).seo?.ogImage || '',
-        sections_json: (pageData as any).sections || {},
-        updated_at: new Date().toISOString()
-      }));
-      client.from('pages').upsert(rows).then(() => {});
-    } catch (err) {
-      console.warn('Failed to mirror pages to Supabase:', err);
-    }
-  }
-
-  // 3. Mirror to JSON file as fallback/export
-  try {
-    const dir = path.dirname(DATA_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(updated, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('Failed to mirror CMS store to disk:', err);
-  }
-
-  return updated;
+  return getCmsStore();
 }
 
-export function updatePageCms(pageKey: keyof GlobalCmsStore['pages'], pageData: CmsPageData): GlobalCmsStore {
-  try {
-    saveDbPage(pageKey, pageData);
-  } catch (err) {
-    console.error(`Failed to update page ${pageKey} in SQLite:`, err);
-  }
+export async function saveCmsStore(data: Partial<GlobalCmsStore>): Promise<GlobalCmsStore> {
+  const current = await getCmsStoreAsync();
+  const updatedPages = {
+    ...current.pages,
+    ...(data.pages || {})
+  };
 
-  // Mirror to Supabase
-  if (isSupabaseConfigured()) {
+  // Save each page through dataService to Supabase
+  for (const [slug, pageData] of Object.entries(updatedPages)) {
     try {
-      const client = getSupabaseAdmin();
-      client.from('pages').upsert({
-        slug: pageKey,
-        title: pageKey.toUpperCase(),
-        meta_title: pageData.seo?.metaTitle || '',
-        meta_description: pageData.seo?.metaDescription || '',
-        og_image: pageData.seo?.ogImage || '',
-        sections_json: pageData.sections || {},
-        updated_at: new Date().toISOString()
-      }).then(() => {});
+      await dataService.savePage(slug, pageData);
     } catch (err) {
-      console.warn(`Failed to mirror page ${pageKey} to Supabase:`, err);
+      console.error(`Error saving CMS page ${slug}:`, err);
     }
   }
 
-  const current = getCmsStore();
-  current.pages[pageKey] = pageData;
-
-  // Mirror to JSON
+  // Also mirror to local disk if writable
   try {
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(current, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('Failed to mirror updated page to JSON:', err);
+    const dir = path.dirname(DATA_FILE_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify({ ...current, pages: updatedPages }, null, 2), 'utf-8');
+  } catch (e) {
+    // Ignored in read-only environment
   }
 
-  return current;
+  return {
+    ...current,
+    pages: updatedPages,
+    lastUpdated: new Date().toISOString()
+  };
+}
+
+export async function updatePageCms(pageKey: keyof GlobalCmsStore['pages'], pageData: CmsPageData): Promise<GlobalCmsStore> {
+  await dataService.savePage(String(pageKey), pageData);
+
+  try {
+    const current = getCmsStore();
+    current.pages[pageKey] = pageData;
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(current, null, 2), 'utf-8');
+  } catch (e) {
+    // Ignored
+  }
+
+  return getCmsStoreAsync();
 }

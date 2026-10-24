@@ -6,8 +6,18 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react';
 import { GRANULE_PRODUCTS } from '@/data/granules';
 
-export default function GranulesPreview() {
+export default function GranulesPreview({ initialGranules }: { initialGranules?: any[] }) {
   const shouldReduceMotion = useReducedMotion();
+
+  const displayGranules = React.useMemo(() => {
+    if (initialGranules && Array.isArray(initialGranules) && initialGranules.length > 0) {
+      const published = initialGranules.filter((g: any) => g.published !== false);
+      if (published.length > 0) {
+        return published.slice(0, 4);
+      }
+    }
+    return GRANULE_PRODUCTS;
+  }, [initialGranules]);
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
@@ -53,7 +63,7 @@ export default function GranulesPreview() {
 
         {/* 4 Core Material Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {GRANULE_PRODUCTS.map((prod, idx) => (
+          {displayGranules.map((prod, idx) => (
             <motion.div
               key={prod.id}
               custom={idx}

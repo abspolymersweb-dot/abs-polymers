@@ -43,7 +43,7 @@ export default function AdminMachineriesPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/products');
+      const res = await fetch('/api/products', { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         setProducts(data.products || []);

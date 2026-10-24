@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { dataService } from '@/services/dataService';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,13 +13,25 @@ export async function GET(request: NextRequest) {
     if (slug) {
       const destination = await dataService.getDestinations(slug, publishedOnly);
       if (!destination) {
-        return NextResponse.json({ success: false, error: 'Destination not found' }, { status: 404 });
+        return NextResponse.json(
+          { success: false, error: 'Destination not found' },
+          {
+            status: 404,
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          }
+        );
       }
-      return NextResponse.json({ success: true, destination });
+      return NextResponse.json(
+        { success: true, destination },
+        { headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } }
+      );
     }
 
     const destinations = await dataService.getDestinations(undefined, publishedOnly);
-    return NextResponse.json({ success: true, count: destinations.length, destinations });
+    return NextResponse.json(
+      { success: true, count: destinations.length, destinations },
+      { headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch destinations' },
@@ -45,12 +60,23 @@ export async function POST(request: NextRequest) {
 
     await dataService.saveDestination(body);
 
+    // Dynamic Cache Invalidation
+    try {
+      revalidatePath('/');
+      revalidatePath('/destinations');
+      revalidatePath(`/destinations/${body.slug}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revErr) {
+      console.warn('Revalidation warning:', revErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Destination saved successfully to database',
       destination: body
     });
   } catch (error: any) {
+    console.error('API destinations POST error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to save destination' },
       { status: 500 }
@@ -69,11 +95,22 @@ export async function DELETE(request: NextRequest) {
 
     await dataService.deleteDestination(id);
 
+    // Dynamic Cache Invalidation
+    try {
+      revalidatePath('/');
+      revalidatePath('/destinations');
+      revalidatePath(`/destinations/${id}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revErr) {
+      console.warn('Revalidation warning:', revErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Destination deleted successfully'
     });
   } catch (error: any) {
+    console.error('API destinations DELETE error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete destination' },
       { status: 500 }

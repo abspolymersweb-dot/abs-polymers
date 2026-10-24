@@ -72,7 +72,7 @@ export default function AdminPagesManager() {
   const fetchCmsData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/cms');
+      const res = await fetch('/api/cms', { cache: 'no-store' });
       const data = await res.json();
       if (data.success && data.store) {
         setStore(data.store);
@@ -138,8 +138,11 @@ export default function AdminPagesManager() {
         throw new Error(data.error || 'Failed to save changes.');
       }
 
+      if (data.store) {
+        setStore(data.store);
+      }
       setHasUnsavedChanges(false);
-      setStatusMessage({ type: 'success', text: `Changes to ${activeMeta.label} saved and published successfully.` });
+      setStatusMessage({ type: 'success', text: `Changes to ${activeMeta.label} saved and published successfully to database.` });
       setTimeout(() => setStatusMessage(null), 4000);
     } catch (err: any) {
       setStatusMessage({ type: 'error', text: err.message || 'Error occurred while saving.' });

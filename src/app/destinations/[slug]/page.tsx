@@ -11,25 +11,27 @@ import {
   ShieldCheck,
   Sparkles,
   Phone,
+  MessageSquare,
   Mail,
   Layers,
   Award,
   Factory,
-  ChevronRight,
-  BookOpen
+  ChevronRight
 } from 'lucide-react';
-import { getDbDestinationBySlug, getAllDbDestinations, getAllDbBlogs } from '@/lib/db';
+import { dataService } from '@/services/dataService';
 import { COMPANY_INFO } from '@/data/company';
-import InquiryForm from '@/components/common/InquiryForm';
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateStaticParams() {
   try {
-    const destinations = getAllDbDestinations(true);
-    return destinations.map((d) => ({ slug: d.slug }));
+    const destinations = await dataService.getDestinations(undefined, true);
+    return (destinations || []).map((d: any) => ({ slug: d.slug }));
   } catch (err) {
     return [];
   }
@@ -37,7 +39,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const dest = getDbDestinationBySlug(slug, true);
+  const dest = await dataService.getDestinations(slug, true);
 
   if (!dest) {
     return {
@@ -64,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           url: dest.heroImage || '/images/products/machines-collage.jpg',
           width: 1200,
           height: 630,
-          alt: dest.imageAlt || `${dest.countryName} Plastic Recycling Machinery`
+          alt: dest.imageAlt || `ABS Polymers Recycling Plants for ${dest.countryName}`
         }
       ]
     }
@@ -73,306 +75,256 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DestinationDetailPage({ params }: Props) {
   const { slug } = await params;
-  const dest = getDbDestinationBySlug(slug, true);
+  const dest = await dataService.getDestinations(slug, true);
 
-  if (!dest || !dest.published) {
+  if (!dest || dest.published === false) {
     notFound();
   }
 
-  const relatedBlogs = getAllDbBlogs(true).slice(0, 2);
+  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const waUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers,%20I%20am%20inquiring%20about%20plastic%20recycling%20machinery%20for%20export%20to%20${encodeURIComponent(dest.countryName)}.`;
+  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Export%20Quotation%20Request:%20${encodeURIComponent(dest.countryName)}&body=Dear%20ABS%20Polymers%20Export%20Team,%0A%0APlease%20provide%20a%20formal%20CIF%20freight%20and%20machinery%20quotation%20for%20${encodeURIComponent(dest.countryName)}.%0A%0APlant%20Capacity%20Required:%0AMaterials%20to%20Recycle:%0APort%20of%20Destination:%0ACompany%20Name:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* 1. Destination Cinematic Hero */}
-      <section className="relative bg-navy-950 text-white pt-24 pb-20 sm:pt-32 sm:pb-28 overflow-hidden border-b border-slate-800">
-        <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none" />
-        <div className="absolute -top-24 right-0 w-96 h-96 bg-brand-orange/15 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Hero Header Banner */}
+      <div className="bg-navy-950 text-white pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <nav className="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-6">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <Link href="/about" className="hover:text-white transition-colors">
-              Global Reach
-            </Link>
+            <Link href="/destinations" className="hover:text-white transition-colors">Global Destinations</Link>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-brand-orange">{dest.countryName}</span>
+            <span className="text-brand-orange truncate font-semibold">{dest.countryName}</span>
           </nav>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-8 space-y-6">
-              {/* Badge */}
-              <div className="inline-flex items-center space-x-2 bg-navy-900/90 border border-slate-700/80 px-3.5 py-1.5 rounded-full shadow-xs">
-                <span className="text-lg leading-none">{dest.flagCode || '🌐'}</span>
-                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  {dest.region}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center space-x-3">
+                <span className="px-3 py-1 bg-brand-orange/20 text-brand-orange text-xs font-black uppercase tracking-wider rounded-full border border-brand-orange/30">
+                  {dest.region} Trade Corridor
                 </span>
-                <span className="text-slate-600">•</span>
-                <span
-                  className={`text-xs font-bold uppercase tracking-wider ${
-                    dest.status === 'established' ? 'text-emerald-400' : 'text-brand-orange'
-                  }`}
-                >
-                  {dest.status === 'established' ? 'Established Export Market' : 'Target Export Market'}
+                <span className="px-2.5 py-1 bg-navy-850 text-slate-300 text-xs font-semibold rounded border border-slate-700">
+                  Direct Factory Export
                 </span>
               </div>
 
-              {/* Title */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.12]">
-                {dest.introTitle || `Plastic Recycling Machinery for ${dest.countryName}`}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                Plastic Recycling Machinery for {dest.countryName}
               </h1>
 
-              {/* Lead Paragraph */}
-              <p className="text-slate-300 text-base sm:text-lg max-w-3xl leading-relaxed">
+              <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
                 {dest.introContent}
               </p>
 
-              {/* Key Highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                {dest.keyApplications.map((app, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start space-x-2.5 bg-navy-900/80 border border-slate-800 rounded-xl p-3"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
-                    <span className="text-xs sm:text-sm text-slate-300 font-medium">{app}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-4">
                 <a
-                  href="#destination-quote"
-                  className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-brand-orange hover:bg-orange-600 rounded-lg shadow-lg shadow-brand-orange/20 transition-colors"
+                  href="#export-desk"
+                  className="inline-flex items-center px-6 py-3.5 text-sm font-bold text-white bg-brand-orange hover:bg-brand-orange-hover rounded-xl shadow-lg transition-transform transform hover:-translate-y-0.5"
                 >
-                  <span>{dest.ctaText || 'Request Export Proposal'}</span>
+                  <span>Request Export Quotation</span>
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </a>
 
-                <Link
-                  href="/machineries"
-                  className="inline-flex items-center px-5 py-3 text-sm font-bold text-slate-300 hover:text-white bg-navy-900 hover:bg-navy-800 border border-slate-700 rounded-lg transition-colors"
-                >
-                  <span>Browse Machinery Catalogue</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Quick Export Factcard */}
-            <div className="lg:col-span-4 bg-navy-900/90 border border-slate-800 rounded-2xl p-6 sm:p-7 space-y-5 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Export Desk Specifications
-                </span>
-                <span className="text-xs font-mono font-bold text-brand-orange">Coimbatore, India</span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Manufacturing Base</span>
-                  <span className="text-white font-medium">Coimbatore, Tamil Nadu</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Target Destination</span>
-                  <span className="text-white font-bold">{dest.countryName}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Electrical Configuration</span>
-                  <span className="text-white font-medium">380V – 415V, 50Hz, 3-Phase</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Motor Drive Standard</span>
-                  <span className="text-white font-medium">Havells High-Torque Electric</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Knife Metallurgy</span>
-                  <span className="text-white font-medium">Hardened EN41 Alloy Steel</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">Contact Tanks</span>
-                  <span className="text-white font-medium">SS 302 Stainless Steel</span>
-                </div>
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-400">Ocean Logistics</span>
-                  <span className="text-white font-medium">FOB / CIF Container Dispatch</span>
-                </div>
-              </div>
-
-              <div className="pt-2">
                 <a
-                  href={`tel:${COMPANY_INFO.contact.phone.replace(/[^0-9+]/g, '')}`}
-                  className="w-full inline-flex items-center justify-center space-x-2 py-2.5 bg-navy-950 hover:bg-slate-900 border border-slate-700 rounded-lg text-xs font-bold text-slate-200 transition-colors"
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-5 py-3.5 text-sm font-semibold text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/30 rounded-xl transition-colors"
                 >
-                  <Phone className="w-3.5 h-3.5 text-brand-orange" />
-                  <span>Call Direct Factory Desk</span>
+                  <MessageSquare className="mr-2 w-4 h-4" />
+                  <span>WhatsApp Export Desk</span>
                 </a>
               </div>
             </div>
+
+            <div className="lg:col-span-5">
+              <div className="relative rounded-2xl overflow-hidden border border-slate-700 shadow-2xl aspect-4/3 w-full bg-navy-900">
+                <Image
+                  src={dest.heroImage || '/images/products/machines-collage.jpg'}
+                  alt={dest.imageAlt || `ABS Polymers in ${dest.countryName}`}
+                  fill
+                  priority
+                  className="object-cover object-center"
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. Recommended Machinery for this Destination */}
-      <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mb-12">
-          <div className="inline-flex items-center space-x-2 text-xs font-bold text-brand-orange uppercase tracking-wider mb-2">
-            <Layers className="w-3.5 h-3.5" />
-            <span>Recommended Machinery Range</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Engineered for Continuous Industrial Recycling in {dest.countryName}
-          </h2>
-          <p className="mt-2 text-slate-600 text-sm sm:text-base leading-relaxed">
-            Our machinery is purpose-built to withstand challenging post-consumer scrap streams with minimal downtime, easily accessible wear components, and modular foot-printing.
-          </p>
-        </div>
+      {/* 2. Key Applications & Recommended Machinery */}
+      <section className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4">
+              Regional Manufacturing & Scrap Processing Overview
+            </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {dest.recommendedMachinery.map((mach, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange">
-                  <Factory className="w-5 h-5" />
+            <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
+              {dest.introContent}
+            </p>
+
+            {dest.keyApplications && dest.keyApplications.length > 0 && (
+              <div className="space-y-4 pt-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Priority Industrial Recycling Demands in {dest.countryName}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {dest.keyApplications.map((app: string, idx: number) => (
+                    <div key={idx} className="flex items-start text-xs sm:text-sm text-slate-700">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 mr-2 shrink-0 mt-0.5" />
+                      <span>{app}</span>
+                    </div>
+                  ))}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">{mach.name}</h3>
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">{mach.role}</p>
               </div>
+            )}
+          </div>
 
-              <div className="pt-2 border-t border-slate-100">
-                <Link
-                  href={`/machineries/${mach.slug}`}
-                  className="inline-flex items-center text-xs font-bold text-brand-orange hover:text-orange-700 transition-colors"
-                >
-                  <span>View Specifications & Dimensions</span>
-                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
-                </Link>
+          <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3">
+              Export Logistics from Coimbatore
+            </h3>
+
+            <div className="space-y-3 text-xs sm:text-sm text-slate-700">
+              <div>
+                <span className="font-semibold block text-slate-500">Target Region</span>
+                <span>{dest.region}</span>
+              </div>
+              <div>
+                <span className="font-semibold block text-slate-500">Dispatch Port</span>
+                <span>Port Tuticorin / Chennai / Nhava Sheva (India)</span>
+              </div>
+              <div>
+                <span className="font-semibold block text-slate-500">Electrical System</span>
+                <span>380V – 415V, 50Hz, 3-Phase (Havells Powered)</span>
+              </div>
+              <div>
+                <span className="font-semibold block text-slate-500">Container Packaging</span>
+                <span>20 FT / 40 FT Open-Top or High-Cube Shipping Containers</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Target Material Badges */}
-        {dest.targetMaterials && dest.targetMaterials.length > 0 && (
-          <div className="mt-10 p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Compatible Polymer Scrap Streams:
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {dest.targetMaterials.map((mat, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 bg-slate-100 text-slate-800 rounded-lg text-xs font-semibold border border-slate-200"
+        {/* Recommended Machinery */}
+        {dest.recommendedMachinery && dest.recommendedMachinery.length > 0 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">
+              Recommended Processing Equipment for {dest.countryName}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {dest.recommendedMachinery.map((mach: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition-colors"
                 >
-                  {mat}
-                </span>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full inline-block">
+                      {mach.role || 'Recommended System'}
+                    </span>
+                    <h3 className="text-lg font-bold text-slate-900">{mach.name}</h3>
+                  </div>
+
+                  <Link
+                    href={`/machineries/${mach.slug}`}
+                    className="inline-flex items-center text-xs font-bold text-brand-orange hover:underline pt-2 border-t border-slate-100"
+                  >
+                    <span>View Technical Specifications</span>
+                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
         )}
       </section>
 
-      {/* 3. Direct Destination Inquiry Form */}
-      <section id="destination-quote" className="py-16 sm:py-24 bg-slate-100 border-t border-slate-200">
+      {/* 3. Direct Destination Export Desk */}
+      <section id="export-desk" className="py-16 sm:py-24 bg-gradient-to-br from-navy-950 via-slate-900 to-navy-900 text-white border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-3 py-1 rounded-full">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Export Engineering Desk</span>
-              </div>
+          <div className="max-w-3xl mx-auto text-center space-y-3 mb-12">
+            <span className="inline-flex items-center text-xs font-black uppercase tracking-wider text-brand-orange bg-brand-orange/15 px-3 py-1 rounded-full border border-brand-orange/30">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              Direct Export Desk for {dest.countryName}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              Order or Consult for Import to {dest.countryName}
+            </h2>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Connect directly with our Coimbatore factory export desk. Get container packing drawings, CIF port delivery timelines, and certified electrical schedules for {dest.countryName}.
+            </p>
+          </div>
 
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                Request an Itemized Quotation for {dest.countryName}
-              </h2>
-
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                Connect directly with our engineering team in Coimbatore. Share your required capacity, available factory floor dimensions, and polymer waste streams for an itemized equipment quote, container layout drawings, and export shipping timelines.
-              </p>
-
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center space-x-3 text-xs text-slate-700 bg-white p-3.5 rounded-xl border border-slate-200">
-                  <MapPin className="w-4 h-4 text-brand-orange shrink-0" />
-                  <span>
-                    <strong>Direct Factory Dispatch:</strong> Coimbatore, Tamil Nadu &rarr; {dest.countryName}
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col justify-between space-y-4">
+              <div>
+                <div className="w-12 h-12 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-3 text-brand-orange">
+                  <Phone className="w-6 h-6" />
                 </div>
-
-                <div className="flex items-center space-x-3 text-xs text-slate-700 bg-white p-3.5 rounded-xl border border-slate-200">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    <strong>Cold & Hot Trial Runs:</strong> Pre-dispatch material cutting inspection at Coimbatore workshop.
-                  </span>
-                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">Export Telephone Hotline</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
+                <div className="text-xs text-slate-400 mt-1">Mon–Sat: 09:00 to 19:00 IST</div>
               </div>
+              <a
+                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
+              >
+                Call Factory
+              </a>
             </div>
 
-            <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
-              <InquiryForm
-                initialDestinationCountry={dest.countryName}
-                initialDestinationId={dest.id}
-                initialInquiryType="machinery_quotation"
-              />
+            <div className="bg-white/5 border border-emerald-500/30 rounded-xl p-6 text-center flex flex-col justify-between space-y-4">
+              <div>
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-400">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">WhatsApp Export Desk</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-xs text-emerald-400 mt-1">Drawings & Itemized Quotes</div>
+              </div>
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors shadow-lg shadow-emerald-900/30"
+              >
+                Chat on WhatsApp
+              </a>
             </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col justify-between space-y-4">
+              <div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-400">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <div className="text-xs uppercase font-bold text-slate-400">Official Export Proforma</div>
+                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-xs text-slate-400 mt-1">Written CIF Quotation</div>
+              </div>
+              <a
+                href={mailtoUrl}
+                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
+              >
+                Email Quotation Request
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-400 flex flex-wrap items-center justify-center gap-4">
+            <span className="flex items-center">
+              <MapPin className="w-3.5 h-3.5 text-brand-orange mr-1" />
+              Works: Coimbatore, Tamil Nadu, India
+            </span>
+            <span className="hidden sm:inline text-slate-600">•</span>
+            <span>Target Market: {dest.countryName} ({dest.region})</span>
           </div>
         </div>
       </section>
-
-      {/* 4. Technical Insights & Related Articles */}
-      {relatedBlogs.length > 0 && (
-        <section className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-orange block mb-1">
-                Knowledge Centre
-              </span>
-              <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                Related Engineering Guides & Export Analysis
-              </h3>
-            </div>
-            <Link
-              href="/blog"
-              className="text-xs font-bold text-brand-orange hover:underline inline-flex items-center"
-            >
-              <span>All Articles</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {relatedBlogs.map((b) => (
-              <Link
-                key={b.id}
-                href={`/blog/${b.slug}`}
-                className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full inline-block">
-                    {b.category}
-                  </span>
-                  <h4 className="text-base font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
-                    {b.title}
-                  </h4>
-                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{b.excerpt}</p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                  <span>{b.readingTimeMinutes || 5} min read</span>
-                  <span className="font-bold text-slate-700 group-hover:text-brand-orange inline-flex items-center">
-                    Read Guide <ArrowRight className="w-3 h-3 ml-1" />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
-

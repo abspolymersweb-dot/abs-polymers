@@ -9,11 +9,21 @@ import ServicesSection from '@/components/home/ServicesSection';
 import WhyChooseAndGlobalReach from '@/components/home/WhyChooseAndGlobalReach';
 import { Phone, MessageSquare, Mail, Sparkles, ShieldCheck, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { COMPANY_INFO } from '@/data/company';
-import { getCmsStore } from '@/services/cmsService';
+import { getCmsStoreAsync } from '@/services/cmsService';
+import { dataService } from '@/services/dataService';
 import Link from 'next/link';
 
-export default function HomePage() {
-  const cmsStore = getCmsStore();
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function HomePage() {
+  const [cmsStore, products, granules, services] = await Promise.all([
+    getCmsStoreAsync(),
+    dataService.getProducts(),
+    dataService.getGranules(),
+    dataService.getServices()
+  ]);
+
   const homeSections = cmsStore?.pages?.home?.sections || {};
 
   return (
@@ -25,7 +35,7 @@ export default function HomePage() {
       <FeatureBar />
 
       {/* 3. Core Machinery Showcase (Washing, Crushers, Conveyors, Blowers) */}
-      <MachineryGrid />
+      <MachineryGrid initialProducts={products} />
 
       {/* 4. Flagship Spotlight: 10 FT Compact Washing Plant */}
       <FeaturedCompactPlant />
@@ -34,10 +44,10 @@ export default function HomePage() {
       <RecyclingProcess />
 
       {/* 6. Recycled Granules Section (35+ Years Heritage) */}
-      <GranulesPreview />
+      <GranulesPreview initialGranules={granules} />
 
       {/* 7. Turnkey Engineering & Lifecycle Services */}
-      <ServicesSection />
+      <ServicesSection initialServices={services} />
 
       {/* 8. Industrial Heritage & Global Reach (Coimbatore + UAE) */}
       <WhyChooseAndGlobalReach />
@@ -68,7 +78,7 @@ export default function HomePage() {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                   <a
-                    href={`tel:${COMPANY_INFO.contact.phone}`}
+                    href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
                     className="inline-flex items-center px-6 py-3.5 text-sm font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl transition-colors"
                   >
                     <Phone className="mr-2 w-4 h-4 text-brand-orange" />
@@ -98,27 +108,32 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                     className="text-sm font-black text-emerald-700 hover:underline block"
                   >
-                    {COMPANY_INFO.contact.whatsappDisplay}
+                    {COMPANY_INFO.contact.whatsapp}
                   </a>
-                  <div className="text-xs text-slate-500">Fast response on WhatsApp</div>
+                  <div className="text-xs text-slate-500">Fast Technical Response</div>
                 </div>
 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-navy-950 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                     <Mail className="w-5 h-5" />
                   </div>
-                  <div className="text-xs font-bold text-slate-500 uppercase">Sales & Export Email</div>
-                  <div className="text-sm font-black text-slate-900 break-all">{COMPANY_INFO.contact.salesEmail}</div>
-                  <div className="text-xs text-slate-500">Engineering proposals</div>
+                  <div className="text-xs font-bold text-slate-500 uppercase">Commercial Desk</div>
+                  <a
+                    href={`mailto:${COMPANY_INFO.contact.email}`}
+                    className="text-sm font-black text-slate-900 hover:text-brand-orange block truncate"
+                  >
+                    {COMPANY_INFO.contact.email}
+                  </a>
+                  <div className="text-xs text-slate-500">Formal Quotations & Proforma</div>
                 </div>
 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                     <MapPin className="w-5 h-5" />
                   </div>
-                  <div className="text-xs font-bold text-slate-500 uppercase">Works Location</div>
-                  <div className="text-sm font-black text-slate-900">Coimbatore, India</div>
-                  <div className="text-xs text-slate-500">Tamil Nadu, 641006</div>
+                  <div className="text-xs font-bold text-slate-500 uppercase">Factory Works</div>
+                  <div className="text-sm font-black text-slate-900">Coimbatore, Tamil Nadu</div>
+                  <div className="text-xs text-slate-500">Export: Pan-India & UAE Port Hubs</div>
                 </div>
               </div>
             </div>

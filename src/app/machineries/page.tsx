@@ -89,14 +89,12 @@ export default function MachineryCataloguePage() {
 
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/products')
+    fetch('/api/products', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data.success && Array.isArray(data.products)) {
           const publishedOnly = data.products.filter((p: any) => p.published !== false);
-          if (publishedOnly.length > 0) {
-            setProductsList(publishedOnly);
-          }
+          setProductsList(publishedOnly);
         }
       })
       .catch((err) => console.warn('Failed to load dynamic machinery:', err));

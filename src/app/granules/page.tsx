@@ -14,14 +14,12 @@ export default function GranulesPage() {
 
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/granules')
+    fetch('/api/granules', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data.success && Array.isArray(data.granules)) {
           const publishedOnly = data.granules.filter((g: any) => g.published !== false);
-          if (publishedOnly.length > 0) {
-            setGranulesList(publishedOnly);
-          }
+          setGranulesList(publishedOnly);
         }
       })
       .catch((err) => console.warn('Failed to load dynamic granules:', err));

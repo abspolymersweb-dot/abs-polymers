@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
@@ -90,8 +90,36 @@ const FEATURED_MACHINERY: MachineryItem[] = [
   },
 ];
 
-export default function MachineryGrid() {
+export default function MachineryGrid({ initialProducts }: { initialProducts?: any[] }) {
   const shouldReduceMotion = useReducedMotion();
+
+  const displayMachinery = useMemo(() => {
+    if (initialProducts && Array.isArray(initialProducts) && initialProducts.length > 0) {
+      const published = initialProducts.filter((p: any) => p.published !== false);
+      if (published.length > 0) {
+        return published.slice(0, 4).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          series: p.series || '',
+          slug: p.slug,
+          category: p.category || 'Recycling Machine',
+          shortDesc: p.shortDescription || '',
+          image: p.heroImage || '/images/products/washing-plant-line.png',
+          imageFit: ((p.heroImage || '').includes('washing') || (p.heroImage || '').includes('crusher') ? 'contain' : 'cover') as 'contain' | 'cover',
+          highlightBadge: p.highlightBadge || '',
+          keySpecs: (p.verifiedSpecs && p.verifiedSpecs.length > 0)
+            ? p.verifiedSpecs.slice(0, 4).map((s: any) => ({ label: s.label, value: s.value }))
+            : [
+                { label: 'Capacity Range', value: (p.variants && p.variants[0]?.capacityKgHr) ? `${p.variants[0].capacityKgHr} kg/h` : 'Industrial' },
+                { label: 'Electric Drive', value: 'Havells 3-Phase Motors' },
+                { label: 'Metallurgy', value: 'SS 302 / EN41 Knives' },
+                { label: 'Duty Cycle', value: '24/7 Heavy Continuous' }
+              ]
+        }));
+      }
+    }
+    return FEATURED_MACHINERY;
+  }, [initialProducts]);
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 25 },
@@ -137,7 +165,7 @@ export default function MachineryGrid() {
 
         {/* Machinery Editorial Grid — 2x2 Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {FEATURED_MACHINERY.map((item, idx) => (
+          {displayMachinery.map((item, idx) => (
             <motion.div
               key={item.id}
               custom={idx}
@@ -192,7 +220,7 @@ export default function MachineryGrid() {
 
                 {/* Key Technical Specs Grid — Clear Dark Text */}
                 <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                  {item.keySpecs.map((spec, sIdx) => (
+                  {item.keySpecs.map((spec: any, sIdx: number) => (
                     <div key={sIdx} className="space-y-0.5">
                       <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                         {spec.label}
