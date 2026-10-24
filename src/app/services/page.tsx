@@ -15,8 +15,16 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function ServicesPage() {
-  const allServices = await dataService.getServices();
+  const [allServices, servicesCms] = await Promise.all([
+    dataService.getServices(),
+    dataService.getPage('services')
+  ]);
   const services = (allServices || []).filter((s: any) => s.isActive !== false);
+
+  const hero = servicesCms?.sections?.hero || {
+    title: 'Services & Complete Recycling Solutions',
+    subtitle: 'From preliminary factory space layout and custom equipment fabrication to on-site commissioning across India and export destinations in the UAE, ABS Polymers delivers end-to-end turnkey machinery solutions.'
+  };
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -29,10 +37,10 @@ export default async function ServicesPage() {
             <span>Industrial Engineering Capabilities</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-            Services & Complete Recycling Solutions
+            {hero.title || 'Services & Complete Recycling Solutions'}
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            From preliminary factory space layout and custom equipment fabrication to on-site commissioning across India and export destinations in the UAE, ABS Polymers delivers end-to-end turnkey machinery solutions.
+            {hero.subtitle || 'From preliminary factory space layout and custom equipment fabrication to on-site commissioning across India and export destinations in the UAE, ABS Polymers delivers end-to-end turnkey machinery solutions.'}
           </p>
         </div>
       </div>

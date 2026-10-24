@@ -1,10 +1,45 @@
-'use client';
-
-import React, { Suspense } from 'react';
+import React from 'react';
+import type { Metadata } from 'next';
 import { Phone, Mail, MapPin, Clock, MessageSquare, Sparkles, ShieldCheck, Factory, Navigation, ExternalLink } from 'lucide-react';
+import { dataService } from '@/services/dataService';
 import { COMPANY_INFO } from '@/data/company';
 
-function ContactContent() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const contactPage = await dataService.getPage('contact');
+  return {
+    title: contactPage?.seo?.metaTitle || 'Contact ABS Polymers | Factory Quotations & Technical Desk',
+    description: contactPage?.seo?.metaDescription || 'Request an itemized price quotation for plastic recycling machinery or recycled granules. Direct WhatsApp, phone, and factory visits in Coimbatore.'
+  };
+}
+
+export default async function ContactPage() {
+  const [companyInfo, contactPageData] = await Promise.all([
+    dataService.getCompanyInfo(),
+    dataService.getPage('contact')
+  ]);
+
+  const sections = contactPageData?.sections || {};
+  const hero = sections.hero || {
+    title: 'Contact ABS Polymers',
+    subtitle: 'Get in touch directly with our Coimbatore manufacturing facility or export sales office. Discuss trial runs, request machinery engineering specifications, or inquire regarding custom recycling lines.'
+  };
+  const contactDetails = sections.contactDetails || {};
+
+  const phone = contactDetails.phone || companyInfo.contact.phone;
+  const phoneDisplay = contactDetails.phoneDisplay || phone;
+  const whatsapp = contactDetails.whatsapp || companyInfo.contact.whatsapp;
+  const whatsappDisplay = contactDetails.whatsappDisplay || whatsapp;
+  const email = contactDetails.salesEmail || companyInfo.contact.salesEmail;
+  const address = contactDetails.address || companyInfo.location.address;
+  const workingHours = contactDetails.workingHours || companyInfo.contact.workingHours;
+  const exportDesk = contactDetails.exportDesk || 'Official Export Partner to the UAE & Middle East';
+
+  const cleanWhatsapp = whatsapp.replace(/\D/g, '');
+  const cleanPhone = phone.replace(/\s+/g, '');
+
   return (
     <div className="bg-slate-50 min-h-screen text-slate-900">
       {/* Header Banner */}
@@ -16,10 +51,10 @@ function ContactContent() {
             <span>Commercial Desk & Technical Support</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-            Contact ABS Polymers
+            {hero.title || 'Contact ABS Polymers'}
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            Get in touch directly with our Coimbatore manufacturing facility or export sales office. Discuss trial runs, request machinery engineering specifications, or inquire regarding custom recycling lines.
+            {hero.subtitle || 'Get in touch directly with our Coimbatore manufacturing facility or export sales office. Discuss trial runs, request machinery engineering specifications, or inquire regarding custom recycling lines.'}
           </p>
         </div>
       </div>
@@ -41,10 +76,10 @@ function ContactContent() {
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Direct Telephone</div>
                   <a
-                    href={`tel:${COMPANY_INFO.contact.phone}`}
+                    href={`tel:${cleanPhone}`}
                     className="text-base font-black text-slate-900 hover:text-brand-orange transition-colors block"
                   >
-                    {COMPANY_INFO.contact.phoneDisplay}
+                    {phoneDisplay}
                   </a>
                   <div className="text-xs text-slate-500">Sales & Machinery Inquiries</div>
                 </div>
@@ -56,12 +91,12 @@ function ContactContent() {
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">WhatsApp Live Chat</div>
                   <a
-                    href={`https://wa.me/${COMPANY_INFO.contact.whatsapp.replace(/\D/g, '')}?text=Hello%20ABS%20Polymers`}
+                    href={`https://wa.me/${cleanWhatsapp}?text=Hello%20ABS%20Polymers`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-base font-black text-emerald-700 hover:underline block"
                   >
-                    {COMPANY_INFO.contact.whatsappDisplay}
+                    {whatsappDisplay}
                   </a>
                   <div className="text-xs text-slate-500">Fast response via chat</div>
                 </div>
@@ -73,10 +108,10 @@ function ContactContent() {
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Official Email</div>
                   <a
-                    href={`mailto:${COMPANY_INFO.contact.salesEmail}`}
+                    href={`mailto:${email}`}
                     className="text-base font-black text-slate-900 hover:text-brand-orange transition-colors block"
                   >
-                    {COMPANY_INFO.contact.salesEmail}
+                    {email}
                   </a>
                   <div className="text-xs text-slate-500">Send technical requirements, tenders, and drawings</div>
                 </div>
@@ -88,7 +123,7 @@ function ContactContent() {
                   <Clock className="w-5 h-5 text-brand-orange mr-3 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 font-bold">Factory Working Hours</strong>
-                    <span className="text-slate-600">{COMPANY_INFO.contact.workingHours} (Indian Standard Time)</span>
+                    <span className="text-slate-600">{workingHours} (Indian Standard Time)</span>
                   </div>
                 </div>
 
@@ -114,14 +149,14 @@ function ContactContent() {
               </h3>
 
               <div className="text-sm text-slate-600 space-y-2">
-                <div className="font-bold text-slate-900">ABS Polymers Works</div>
-                <p className="leading-relaxed">{COMPANY_INFO.location.address}</p>
-                <p className="text-xs text-slate-500">Coimbatore, Tamil Nadu, 641006, India</p>
+                <div className="font-bold text-slate-900">{companyInfo.name || 'ABS Polymers Works'}</div>
+                <p className="leading-relaxed">{address}</p>
+                <p className="text-xs text-slate-500">Coimbatore, Tamil Nadu, India</p>
               </div>
 
               <div className="pt-3 border-t border-slate-100">
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(COMPANY_INFO.location.address)}`}
+                  href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-xs font-bold text-brand-orange hover:underline"
@@ -140,7 +175,7 @@ function ContactContent() {
                 <span>Export Packaging & Logistics</span>
               </div>
               <h3 className="text-base font-bold text-white">
-                Supplying UAE & International Recyclers
+                {exportDesk}
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Containerized seaworthy packing, freight forwarding via Kochi / Tuticorin ports, documentation, and on-site factory engineer dispatch for installation and commissioning across the UAE and East Africa.
@@ -150,13 +185,5 @@ function ContactContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ContactPage() {
-  return (
-    <Suspense fallback={<div className="p-12 text-center text-slate-500">Loading Contact Information...</div>}>
-      <ContactContent />
-    </Suspense>
   );
 }

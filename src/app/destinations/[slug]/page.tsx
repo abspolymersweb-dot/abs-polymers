@@ -75,15 +75,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DestinationDetailPage({ params }: Props) {
   const { slug } = await params;
-  const dest = await dataService.getDestinations(slug, true);
+  const [dest, companyInfo] = await Promise.all([
+    dataService.getDestinations(slug, true),
+    dataService.getCompanyInfo()
+  ]);
 
   if (!dest || dest.published === false) {
     notFound();
   }
 
-  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const cleanWhatsApp = companyInfo.contact.whatsapp.replace(/\D/g, '');
   const waUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers,%20I%20am%20inquiring%20about%20plastic%20recycling%20machinery%20for%20export%20to%20${encodeURIComponent(dest.countryName)}.`;
-  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Export%20Quotation%20Request:%20${encodeURIComponent(dest.countryName)}&body=Dear%20ABS%20Polymers%20Export%20Team,%0A%0APlease%20provide%20a%20formal%20CIF%20freight%20and%20machinery%20quotation%20for%20${encodeURIComponent(dest.countryName)}.%0A%0APlant%20Capacity%20Required:%0AMaterials%20to%20Recycle:%0APort%20of%20Destination:%0ACompany%20Name:`;
+  const mailtoUrl = `mailto:${companyInfo.contact.salesEmail}?subject=Export%20Quotation%20Request:%20${encodeURIComponent(dest.countryName)}&body=Dear%20ABS%20Polymers%20Export%20Team,%0A%0APlease%20provide%20a%20formal%20CIF%20freight%20and%20machinery%20quotation%20for%20${encodeURIComponent(dest.countryName)}.%0A%0APlant%20Capacity%20Required:%0AMaterials%20to%20Recycle:%0APort%20of%20Destination:%0ACompany%20Name:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -267,11 +270,11 @@ export default async function DestinationDetailPage({ params }: Props) {
                   <Phone className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Export Telephone Hotline</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
-                <div className="text-xs text-slate-400 mt-1">Mon–Sat: 09:00 to 19:00 IST</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.phoneDisplay}</div>
+                <div className="text-xs text-slate-400 mt-1">{companyInfo.contact.workingHours || 'Mon–Sat: 09:00 to 19:00 IST'}</div>
               </div>
               <a
-                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                href={`tel:${companyInfo.contact.phone.replace(/\s+/g, '')}`}
                 className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
               >
                 Call Factory
@@ -284,7 +287,7 @@ export default async function DestinationDetailPage({ params }: Props) {
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">WhatsApp Export Desk</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.whatsappDisplay || companyInfo.contact.whatsapp}</div>
                 <div className="text-xs text-emerald-400 mt-1">Drawings & Itemized Quotes</div>
               </div>
               <a
@@ -303,7 +306,7 @@ export default async function DestinationDetailPage({ params }: Props) {
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Official Export Proforma</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.salesEmail}</div>
                 <div className="text-xs text-slate-400 mt-1">Written CIF Quotation</div>
               </div>
               <a

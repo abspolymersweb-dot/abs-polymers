@@ -3,6 +3,10 @@ import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { COMPANY_INFO } from '@/data/company';
+import { dataService } from '@/services/dataService';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://abspolymers.com'),
@@ -59,37 +63,38 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const gscVerification = process.env.NEXT_PUBLIC_GSC_VERIFICATION;
+  const companyInfo = await dataService.getCompanyInfo();
 
   // Schema.org Organization structured data
   const orgJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: COMPANY_INFO.name,
+    name: companyInfo.name,
     image: 'https://abspolymers.com/images/logo.png',
     '@id': 'https://abspolymers.com',
     url: 'https://abspolymers.com',
-    telephone: COMPANY_INFO.contact.phone,
-    email: COMPANY_INFO.contact.salesEmail,
+    telephone: companyInfo.contact.phone,
+    email: companyInfo.contact.salesEmail,
     priceRange: '₹₹₹',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: COMPANY_INFO.location.address,
-      addressLocality: COMPANY_INFO.location.city,
-      addressRegion: COMPANY_INFO.location.state,
+      streetAddress: companyInfo.location.address,
+      addressLocality: companyInfo.location.city,
+      addressRegion: companyInfo.location.state,
       postalCode: '641006',
       addressCountry: 'IN'
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: COMPANY_INFO.location.geo.lat,
-      longitude: COMPANY_INFO.location.geo.lng
+      latitude: companyInfo.location.geo.lat,
+      longitude: companyInfo.location.geo.lng
     },
     openingHoursSpecification: {
       '@type': 'OpeningHoursSpecification',
@@ -98,8 +103,8 @@ export default function RootLayout({
       closes: '18:30'
     },
     sameAs: [
-      COMPANY_INFO.socialLinks.linkedin,
-      COMPANY_INFO.socialLinks.youtube
+      companyInfo.socialLinks.linkedin,
+      companyInfo.socialLinks.youtube
     ]
   };
 
@@ -133,9 +138,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-brand-orange selection:text-white">
-        <Navbar />
+        <Navbar companyInfo={companyInfo} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer companyInfo={companyInfo} />
       </body>
     </html>
   );

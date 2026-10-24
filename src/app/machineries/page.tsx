@@ -86,6 +86,10 @@ export default function MachineryCataloguePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [activeStage, setActiveStage] = useState(0);
+  const [heroContent, setHeroContent] = useState({
+    title: 'Plastic Recycling Machinery Catalogue',
+    subtitle: 'Engineered in Coimbatore, India. Designed for heavy-duty 24/7 continuous duty, low power consumption, and maximum polymer recovery. Explore verified technical datasheets for washing lines, crushers, conveyors, and blowers.'
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -98,6 +102,16 @@ export default function MachineryCataloguePage() {
         }
       })
       .catch((err) => console.warn('Failed to load dynamic machinery:', err));
+
+    fetch('/api/cms?page=machineries', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && data.data?.sections?.hero) {
+          const h = data.data.sections.hero;
+          if (h.title) setHeroContent((prev) => ({ ...prev, title: h.title, subtitle: h.subtitle || prev.subtitle }));
+        }
+      })
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -136,10 +150,10 @@ export default function MachineryCataloguePage() {
             <span>Industrial Machinery & Processing Lines</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-            Plastic Recycling Machinery Catalogue
+            {heroContent.title}
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            Engineered in Coimbatore, India. Designed for heavy-duty 24/7 continuous duty, low power consumption, and maximum polymer recovery. Explore verified technical datasheets for washing lines, crushers, conveyors, and blowers.
+            {heroContent.subtitle}
           </p>
         </div>
       </div>

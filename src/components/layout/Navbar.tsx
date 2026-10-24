@@ -71,12 +71,43 @@ const dropdownVariants: Variants = {
 
 /* ─── Component ──────────────────────────────────────────── */
 
-export default function Navbar() {
+interface NavbarProps {
+  companyInfo?: any;
+}
+
+export default function Navbar({ companyInfo: initialCompanyInfo }: NavbarProps) {
   const pathname = usePathname();
   const isHome = pathname === '/';
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dynamicInfo, setDynamicInfo] = useState<any>(initialCompanyInfo || null);
+
+  useEffect(() => {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.settings) {
+          const s = data.settings;
+          setDynamicInfo((prev: any) => ({
+            ...(prev || COMPANY_INFO),
+            contact: {
+              ...(prev?.contact || COMPANY_INFO.contact),
+              phone: s.phone || prev?.contact?.phone || COMPANY_INFO.contact.phone,
+              phoneDisplay: s.phone || prev?.contact?.phoneDisplay || COMPANY_INFO.contact.phoneDisplay,
+              whatsapp: s.whatsapp || prev?.contact?.whatsapp || COMPANY_INFO.contact.whatsapp,
+              salesEmail: s.email || prev?.contact?.salesEmail || COMPANY_INFO.contact.salesEmail,
+            }
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const info = dynamicInfo || initialCompanyInfo || COMPANY_INFO;
+  const phoneVal = info.contact?.phone || COMPANY_INFO.contact.phone;
+  const phoneDisplayVal = info.contact?.phoneDisplay || phoneVal;
+  const emailVal = info.contact?.salesEmail || info.contact?.email || COMPANY_INFO.contact.salesEmail;
 
   /* Scroll listener — lightweight threshold for smooth transition */
   const handleScroll = useCallback(() => {
@@ -331,18 +362,18 @@ export default function Navbar() {
 
                 <div className="pt-2 border-t border-slate-800/80 space-y-2 text-xs text-slate-400">
                   <a
-                    href={`tel:${COMPANY_INFO.contact.phone}`}
+                    href={`tel:${phoneVal.replace(/\s+/g, '')}`}
                     className="flex items-center text-slate-300 hover:text-brand-orange transition-colors"
                   >
                     <Phone className="w-4 h-4 mr-2 text-brand-orange shrink-0" />
-                    <span>{COMPANY_INFO.contact.phoneDisplay}</span>
+                    <span>{phoneDisplayVal}</span>
                   </a>
                   <a
-                    href={`mailto:${COMPANY_INFO.contact.salesEmail}`}
+                    href={`mailto:${emailVal}`}
                     className="flex items-center text-slate-300 hover:text-brand-orange transition-colors"
                   >
                     <Mail className="w-4 h-4 mr-2 text-brand-orange shrink-0" />
-                    <span>{COMPANY_INFO.contact.salesEmail}</span>
+                    <span>{emailVal}</span>
                   </a>
                 </div>
               </div>

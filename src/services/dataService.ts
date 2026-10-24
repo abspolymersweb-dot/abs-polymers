@@ -28,6 +28,7 @@ import {
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { Destination, BlogPost } from '@/types';
 import { MACHINERY_PRODUCTS } from '@/data/machinery';
+import { COMPANY_INFO } from '@/data/company';
 import { GRANULE_PRODUCTS } from '@/data/granules';
 import { SERVICES_DATA } from '@/data/services';
 
@@ -688,9 +689,14 @@ export const dataService = {
           value: String(value),
           updated_at: new Date().toISOString()
         }));
-        await client.from('site_settings').upsert(rows);
+        const { error } = await client.from('site_settings').upsert(rows);
+        if (error) {
+          console.error('Supabase settings save error:', error);
+          throw new Error(error.message);
+        }
       } catch (err) {
-        console.warn('Supabase settings save fallback:', err);
+        console.error('Supabase settings save failed:', err);
+        throw err;
       }
     }
 
@@ -702,6 +708,66 @@ export const dataService = {
       // Ignored
     }
     return true;
+  },
+
+  async getCompanyInfo(): Promise<typeof COMPANY_INFO & { creator: { attribution: string; url: string } }> {
+    try {
+      const [settings, pages] = await Promise.all([
+        this.getSettings(),
+        this.getPages()
+      ]);
+
+      const contactPage = pages?.contact?.sections || {};
+      const contactDetails = contactPage.contactDetails || {};
+      const footerPage = pages?.footer?.sections || {};
+
+      const phone = settings.phone || contactDetails.phone || footerPage.phone || COMPANY_INFO.contact.phone;
+      const phoneDisplay = contactDetails.phoneDisplay || settings.phone || footerPage.phoneDisplay || COMPANY_INFO.contact.phoneDisplay;
+      const whatsapp = settings.whatsapp || contactDetails.whatsapp || footerPage.whatsapp || COMPANY_INFO.contact.whatsapp;
+      const whatsappDisplay = contactDetails.whatsappDisplay || settings.whatsapp || footerPage.whatsappDisplay || COMPANY_INFO.contact.whatsappDisplay;
+      const email = settings.email || contactDetails.salesEmail || footerPage.salesEmail || COMPANY_INFO.contact.salesEmail;
+      const address = settings.factory_address || contactDetails.address || footerPage.factoryAddress || COMPANY_INFO.location.address;
+      const workingHours = contactDetails.workingHours || footerPage.workingHours || COMPANY_INFO.contact.workingHours;
+      const companySummary = footerPage.companySummary || COMPANY_INFO.shortAbout;
+      const name = settings.company_name || COMPANY_INFO.name;
+
+      const creatorAttribution = footerPage.creatorText || (footerPage.sections && footerPage.sections.creatorText) || settings.creator_attribution || 'Created by dawnexus';
+      const creatorUrl = footerPage.creatorUrl || (footerPage.sections && footerPage.sections.creatorUrl) || settings.creator_url || 'https://dawnexus.in';
+
+      return {
+        ...COMPANY_INFO,
+        name,
+        shortAbout: companySummary,
+        location: {
+          ...COMPANY_INFO.location,
+          address
+        },
+        contact: {
+          ...COMPANY_INFO.contact,
+          phone,
+          phoneDisplay,
+          whatsapp,
+          whatsappDisplay,
+          email,
+          salesEmail: email,
+          supportEmail: email,
+          workingHours
+        },
+        creator: {
+          attribution: creatorAttribution,
+          url: creatorUrl
+        }
+      };
+    } catch (err) {
+      console.warn('Error building dynamic company info, fallback to static:', err);
+      return {
+        ...COMPANY_INFO,
+        creator: {
+          attribution: 'Created by dawnexus',
+          url: 'https://dawnexus.in'
+        }
+      };
+    }
   },
 
   // --------------------------------------------------------------------------

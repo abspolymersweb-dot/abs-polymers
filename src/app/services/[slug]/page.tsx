@@ -63,16 +63,19 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const service = await dataService.getServices(slug);
+  const [service, companyInfo] = await Promise.all([
+    dataService.getServices(slug),
+    dataService.getCompanyInfo()
+  ]);
 
   if (!service || service.isActive === false) {
     notFound();
   }
 
   const Icon = iconMap[service.iconName] || Factory;
-  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const cleanWhatsApp = companyInfo.contact.whatsapp.replace(/\D/g, '');
   const waUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers,%20I%20am%20inquiring%20about%20your%20service:%20${encodeURIComponent(service.title)}.`;
-  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Service%20Consultation%20Request:%20${encodeURIComponent(service.title)}&body=Dear%20ABS%20Polymers%20Team,%0A%0AI%20would%20like%20to%20consult%20regarding%20${encodeURIComponent(service.title)}.%0A%0ACompany%20Name:%0ARequirement%20Details:%0ALocation:%0APhone%20Number:`;
+  const mailtoUrl = `mailto:${companyInfo.contact.salesEmail}?subject=Service%20Consultation%20Request:%20${encodeURIComponent(service.title)}&body=Dear%20ABS%20Polymers%20Team,%0A%0AI%20would%20like%20to%20consult%20regarding%20${encodeURIComponent(service.title)}.%0A%0ACompany%20Name:%0ARequirement%20Details:%0ALocation:%0APhone%20Number:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -193,11 +196,11 @@ export default async function ServiceDetailPage({
                   <Phone className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Direct Factory Hotline</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
-                <div className="text-xs text-slate-400 mt-1">Mon-Sat, 9:00 AM – 7:00 PM IST</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.phoneDisplay}</div>
+                <div className="text-xs text-slate-400 mt-1">{companyInfo.contact.workingHours || 'Mon-Sat, 9:00 AM – 7:00 PM IST'}</div>
               </div>
               <a
-                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                href={`tel:${companyInfo.contact.phone.replace(/\s+/g, '')}`}
                 className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
               >
                 Call Engineer
@@ -211,7 +214,7 @@ export default async function ServiceDetailPage({
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Instant WhatsApp Desk</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.whatsappDisplay || companyInfo.contact.whatsapp}</div>
                 <div className="text-xs text-emerald-400 mt-1">Fast Response & Drawings</div>
               </div>
               <a
@@ -231,7 +234,7 @@ export default async function ServiceDetailPage({
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Engineering Inquiry Email</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.salesEmail}</div>
                 <div className="text-xs text-slate-400 mt-1">Formal Proforma & Scope</div>
               </div>
               <a

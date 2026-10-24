@@ -52,15 +52,18 @@ export default async function GranuleDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const product = await dataService.getGranules(slug);
+  const [product, companyInfo] = await Promise.all([
+    dataService.getGranules(slug),
+    dataService.getCompanyInfo()
+  ]);
 
   if (!product || product.published === false) {
     notFound();
   }
 
-  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const cleanWhatsApp = companyInfo.contact.whatsapp.replace(/\D/g, '');
   const waSampleUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers,%20I%20would%20like%20to%20request%20samples%20and%20rates%20for%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(product.grade)}).`;
-  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Granule%20Supply%20Quotation:%20${encodeURIComponent(product.name)}&body=Dear%20ABS%20Polymers%20Team,%0A%0APlease%20provide%20a%20commercial%20quotation%20for%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(product.grade)}).%0A%0AMonthly%20Volume%20(MT):%0AColor/Specification:%0ADelivery%20Destination:%0ACompany%20Name:`;
+  const mailtoUrl = `mailto:${companyInfo.contact.salesEmail}?subject=Granule%20Supply%20Quotation:%20${encodeURIComponent(product.name)}&body=Dear%20ABS%20Polymers%20Team,%0A%0APlease%20provide%20a%20commercial%20quotation%20for%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(product.grade)}).%0A%0AMonthly%20Volume%20(MT):%0AColor/Specification:%0ADelivery%20Destination:%0ACompany%20Name:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -204,11 +207,11 @@ export default async function GranuleDetailPage({
                   <Phone className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Direct Factory Hotline</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
-                <div className="text-xs text-slate-400 mt-1">Mon-Sat, 9:00 AM – 7:00 PM IST</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.phoneDisplay}</div>
+                <div className="text-xs text-slate-400 mt-1">{companyInfo.contact.workingHours || 'Mon-Sat, 9:00 AM – 7:00 PM IST'}</div>
               </div>
               <a
-                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                href={`tel:${companyInfo.contact.phone.replace(/\s+/g, '')}`}
                 className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
               >
                 Call Commercial Desk
@@ -222,7 +225,7 @@ export default async function GranuleDetailPage({
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Instant WhatsApp Desk</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.whatsappDisplay || companyInfo.contact.whatsapp}</div>
                 <div className="text-xs text-emerald-400 mt-1">Samples & Lab COA Reports</div>
               </div>
               <a
@@ -242,7 +245,7 @@ export default async function GranuleDetailPage({
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Formal Quotation Email</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.salesEmail}</div>
                 <div className="text-xs text-slate-400 mt-1">Written Proforma & Bulk Rates</div>
               </div>
               <a

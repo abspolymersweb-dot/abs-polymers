@@ -17,11 +17,12 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [cmsStore, products, granules, services] = await Promise.all([
+  const [cmsStore, products, granules, services, companyInfo] = await Promise.all([
     getCmsStoreAsync(),
     dataService.getProducts(),
     dataService.getGranules(),
-    dataService.getServices()
+    dataService.getServices(),
+    dataService.getCompanyInfo()
   ]);
 
   const homeSections = cmsStore?.pages?.home?.sections || {};
@@ -78,11 +79,11 @@ export default async function HomePage() {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                   <a
-                    href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                    href={`tel:${companyInfo.contact.phone.replace(/\s+/g, '')}`}
                     className="inline-flex items-center px-6 py-3.5 text-sm font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl transition-colors"
                   >
                     <Phone className="mr-2 w-4 h-4 text-brand-orange" />
-                    <span>{COMPANY_INFO.contact.phoneDisplay}</span>
+                    <span>{companyInfo.contact.phoneDisplay}</span>
                   </a>
                 </div>
               </div>
@@ -93,8 +94,8 @@ export default async function HomePage() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase">Direct Telephone</div>
-                  <div className="text-sm font-black text-slate-900">{COMPANY_INFO.contact.phoneDisplay}</div>
-                  <div className="text-xs text-slate-500">Mon–Sat: 09:00 to 18:30</div>
+                  <div className="text-sm font-black text-slate-900">{companyInfo.contact.phoneDisplay}</div>
+                  <div className="text-xs text-slate-500">{companyInfo.contact.workingHours || 'Mon–Sat: 09:00 to 18:30'}</div>
                 </div>
 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
@@ -103,12 +104,12 @@ export default async function HomePage() {
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase">WhatsApp Live Chat</div>
                   <a
-                    href={`https://wa.me/${COMPANY_INFO.contact.whatsapp.replace(/\D/g, '')}?text=Hello%20ABS%20Polymers`}
+                    href={`https://wa.me/${companyInfo.contact.whatsapp.replace(/\D/g, '')}?text=Hello%20ABS%20Polymers`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm font-black text-emerald-700 hover:underline block"
                   >
-                    {COMPANY_INFO.contact.whatsapp}
+                    {companyInfo.contact.whatsappDisplay || companyInfo.contact.whatsapp}
                   </a>
                   <div className="text-xs text-slate-500">Fast Technical Response</div>
                 </div>
@@ -119,10 +120,10 @@ export default async function HomePage() {
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase">Commercial Desk</div>
                   <a
-                    href={`mailto:${COMPANY_INFO.contact.email}`}
+                    href={`mailto:${companyInfo.contact.salesEmail}`}
                     className="text-sm font-black text-slate-900 hover:text-brand-orange block truncate"
                   >
-                    {COMPANY_INFO.contact.email}
+                    {companyInfo.contact.salesEmail}
                   </a>
                   <div className="text-xs text-slate-500">Formal Quotations & Proforma</div>
                 </div>
@@ -132,7 +133,7 @@ export default async function HomePage() {
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div className="text-xs font-bold text-slate-500 uppercase">Factory Works</div>
-                  <div className="text-sm font-black text-slate-900">Coimbatore, Tamil Nadu</div>
+                  <div className="text-sm font-black text-slate-900">{companyInfo.location.address}</div>
                   <div className="text-xs text-slate-500">Export: Pan-India & UAE Port Hubs</div>
                 </div>
               </div>

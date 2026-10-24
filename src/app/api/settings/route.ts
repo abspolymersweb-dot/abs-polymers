@@ -28,9 +28,14 @@ export async function POST(request: NextRequest) {
       const updated = await dataService.getSettings();
 
       try {
+        revalidatePath('/', 'layout');
         revalidatePath('/');
         revalidatePath('/about');
         revalidatePath('/contact');
+        revalidatePath('/machineries');
+        revalidatePath('/granules');
+        revalidatePath('/services');
+        revalidatePath('/destinations');
         revalidatePath('/sitemap.xml');
       } catch (revErr) {
         // Safe
@@ -47,9 +52,14 @@ export async function POST(request: NextRequest) {
       await dataService.saveSettings({ [body.key]: String(body.value) });
 
       try {
+        revalidatePath('/', 'layout');
         revalidatePath('/');
         revalidatePath('/about');
         revalidatePath('/contact');
+        revalidatePath('/machineries');
+        revalidatePath('/granules');
+        revalidatePath('/services');
+        revalidatePath('/destinations');
         revalidatePath('/sitemap.xml');
       } catch (revErr) {
         // Safe

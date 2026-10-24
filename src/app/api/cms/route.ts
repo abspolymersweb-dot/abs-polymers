@@ -46,9 +46,20 @@ export async function POST(request: NextRequest) {
 
       // Revalidate affected routes
       try {
+        revalidatePath('/', 'layout');
         revalidatePath('/');
         if (pageKey === 'home') revalidatePath('/');
-        else revalidatePath(`/${pageKey}`);
+        else if (pageKey === 'footer') {
+          revalidatePath('/', 'layout');
+        } else {
+          revalidatePath(`/${pageKey}`);
+        }
+        revalidatePath('/about');
+        revalidatePath('/contact');
+        revalidatePath('/machineries');
+        revalidatePath('/granules');
+        revalidatePath('/services');
+        revalidatePath('/destinations');
         revalidatePath('/sitemap.xml');
       } catch (revErr) {
         console.warn('CMS revalidation warning:', revErr);

@@ -62,7 +62,10 @@ export default async function MachineryDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const product = await dataService.getProducts(slug);
+  const [product, companyInfo] = await Promise.all([
+    dataService.getProducts(slug),
+    dataService.getCompanyInfo()
+  ]);
 
   if (!product || product.published === false) {
     notFound();
@@ -72,9 +75,9 @@ export default async function MachineryDetailPage({
     (product.heroImage || '').includes('washing-plant') ||
     (product.heroImage || '').includes('crusher-granulator');
 
-  const cleanWhatsApp = COMPANY_INFO.contact.whatsapp.replace(/\D/g, '');
+  const cleanWhatsApp = companyInfo.contact.whatsapp.replace(/\D/g, '');
   const waUrl = `https://wa.me/${cleanWhatsApp}?text=Hello%20ABS%20Polymers%20Factory,%20I%20would%20like%20to%20request%20specifications%20and%20quotation%20for%20${encodeURIComponent(product.name)}.`;
-  const mailtoUrl = `mailto:${COMPANY_INFO.contact.email}?subject=Commercial%20Quotation%20Request:%20${encodeURIComponent(product.name)}&body=Dear%20ABS%20Polymers%20Team,%0A%0AI%20would%20like%20to%20request%20a%20formal%20quotation%20and%20technical%20drawing%20for%20${encodeURIComponent(product.name)}.%0A%0ARequired%20Capacity:%0AMaterial%20to%20Process:%0ADelivery%20Location:%0AContact%20Number:`;
+  const mailtoUrl = `mailto:${companyInfo.contact.salesEmail}?subject=Commercial%20Quotation%20Request:%20${encodeURIComponent(product.name)}&body=Dear%20ABS%20Polymers%20Team,%0A%0AI%20would%20like%20to%20request%20a%20formal%20quotation%20and%20technical%20drawing%20for%20${encodeURIComponent(product.name)}.%0A%0ARequired%20Capacity:%0AMaterial%20to%20Process:%0ADelivery%20Location:%0AContact%20Number:`;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -339,11 +342,11 @@ export default async function MachineryDetailPage({
                   <Phone className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Direct Factory Hotline</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.phone}</div>
-                <div className="text-xs text-slate-400 mt-1">Mon-Sat, 9:00 AM – 7:00 PM IST</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.phoneDisplay}</div>
+                <div className="text-xs text-slate-400 mt-1">{companyInfo.contact.workingHours || 'Mon-Sat, 9:00 AM – 7:00 PM IST'}</div>
               </div>
               <a
-                href={`tel:${COMPANY_INFO.contact.phone.replace(/\s+/g, '')}`}
+                href={`tel:${companyInfo.contact.phone.replace(/\s+/g, '')}`}
                 className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-lg transition-colors"
               >
                 Call Engineer
@@ -357,7 +360,7 @@ export default async function MachineryDetailPage({
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Instant WhatsApp Desk</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.whatsapp}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.whatsappDisplay || companyInfo.contact.whatsapp}</div>
                 <div className="text-xs text-emerald-400 mt-1">Fast Response & Drawings</div>
               </div>
               <a
@@ -377,7 +380,7 @@ export default async function MachineryDetailPage({
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-xs uppercase font-bold text-slate-400">Formal Quotation Email</div>
-                <div className="text-base font-bold text-white mt-1">{COMPANY_INFO.contact.email}</div>
+                <div className="text-base font-bold text-white mt-1">{companyInfo.contact.salesEmail}</div>
                 <div className="text-xs text-slate-400 mt-1">Written Proforma & Specs</div>
               </div>
               <a

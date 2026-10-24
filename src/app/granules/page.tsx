@@ -11,6 +11,10 @@ export default function GranulesPage() {
   const [granulesList, setGranulesList] = useState<any[]>(GRANULE_PRODUCTS);
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [heroContent, setHeroContent] = useState({
+    title: 'Recycled & Reprocessed Plastic Granules',
+    subtitle: 'Supplying consistent, lab-tested recycled HDPE, PP, LDPE, ABS, and HIPS granules from Coimbatore. Double-mesh filtered and washed in our proprietary washing plants for exceptional moulding stability.'
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -23,6 +27,16 @@ export default function GranulesPage() {
         }
       })
       .catch((err) => console.warn('Failed to load dynamic granules:', err));
+
+    fetch('/api/cms?page=granules', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && data.data?.sections?.hero) {
+          const h = data.data.sections.hero;
+          if (h.title) setHeroContent((prev) => ({ ...prev, title: h.title, subtitle: h.subtitle || prev.subtitle }));
+        }
+      })
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -54,10 +68,10 @@ export default function GranulesPage() {
             <span>35+ Years Granule Industry Leadership</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-            Recycled & Reprocessed Plastic Granules
+            {heroContent.title}
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            Supplying consistent, lab-tested recycled HDPE, PP, LDPE, ABS, and HIPS granules from Coimbatore. Double-mesh filtered and washed in our proprietary washing plants for exceptional moulding stability.
+            {heroContent.subtitle}
           </p>
         </div>
       </div>
